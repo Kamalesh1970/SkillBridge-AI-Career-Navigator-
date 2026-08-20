@@ -52,6 +52,7 @@ class ChatMessage(BaseModel):
 class InterviewTurnRequest(BaseModel):
     target_role: str
     history: List[ChatMessage]
+    candidate_skills: Optional[List[str]] = None
 
 class InterviewTurnResponse(BaseModel):
     next_message: str

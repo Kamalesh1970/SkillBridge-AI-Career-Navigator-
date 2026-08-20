@@ -1,0 +1,55 @@
+{
+  "languages": {
+    "Python": ["python", "py"],
+    "Java": ["java"],
+    "C++": ["c\\+\\+", "cpp"],
+    "JavaScript": ["javascript", "js", "node\\.js", "nodejs"],
+    "TypeScript": ["typescript", "ts"],
+    "SQL": ["sql", "mysql", "postgresql", "postgres", "sqlite"],
+    "HTML": ["html", "html5"],
+    "CSS": ["css", "css3", "tailwind", "tailwindcss"],
+    "R": ["\\br\\b"],
+    "Go": ["\\bgo\\b", "golang"],
+    "Rust": ["rust"]
+  },
+  "ml_ds_frameworks": {
+    "TensorFlow": ["tensorflow", "tf"],
+    "PyTorch": ["pytorch", "torch"],
+    "scikit-learn": ["scikit-learn", "sklearn", "scikit learn"],
+    "Keras": ["keras"],
+    "Hugging Face": ["huggingface", "hugging face", "hf"],
+    "PaddleOCR": ["paddleocr", "paddle ocr"],
+    "CLIP": ["\\bclip\\b"],
+    "FAISS": ["\\bfaiss\\b"],
+    "XGBoost": ["xgboost", "xgb"],
+    "LightGBM": ["lightgbm", "lgb"],
+    "Transformers": ["transformers", "transformer"]
+  },
+  "ds_libraries": {
+    "Pandas": ["pandas"],
+    "NumPy": ["numpy"],
+    "Matplotlib": ["matplotlib"],
+    "Seaborn": ["seaborn"],
+    "SciPy": ["scipy"],
+    "NLTK": ["nltk"],
+    "Spacy": ["spacy", "spaCy"],
+    "OpenCV": ["opencv", "open-cv"]
+  },
+  "mlops_infra": {
+    "Docker": ["docker"],
+    "Kubernetes": ["kubernetes", "k8s"],
+    "MLflow": ["mlflow"],
+    "FastAPI": ["fastapi", "fast api"],
+    "Flask": ["flask"],
+    "Django": ["django"],
+    "Git": ["git", "github", "gitlab"],
+    "RAG": ["rag", "retrieval-augmented generation", "vector database", "chromadb", "pinecone", "milvus", "qdrant"],
+    "AWS": ["aws", "amazon web services"],
+    "GCP": ["gcp", "google cloud"],
+    "Azure": ["azure"],
+    "Firebase": ["firebase"],
+    "ROS2": ["ros2", "ros 2"],
+    "Kaggle": ["kaggle"],
+    "Jupyter": ["jupyter", "jupyter notebook", "jupyter notebooks"]
+  }
+}

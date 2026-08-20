@@ -13,6 +13,19 @@
     "sample_JD_text": "We are looking for a Data Analyst to join our team. You will write complex SQL queries, analyze user behavior, build dashboards in Tableau/PowerBI, and translate analytical insights into concrete business suggestions. Must be strong with SQL, python, and statistical basics."
   },
   {
+    "title": "Machine Learning Engineer",
+    "required_skills": ["Python", "PyTorch", "Machine Learning", "Scikit-Learn", "SQL"],
+    "nice_to_have_skills": ["Docker", "Kubernetes", "MLflow", "TensorFlow", "Transformers"],
+    "typical_interview_questions": [
+      "What is overfitting, and how do you prevent it in a deep learning model?",
+      "Explain the bias-variance tradeoff.",
+      "How do you deploy a machine learning model to a production environment?",
+      "Describe how a Transformer-based language model works under the hood.",
+      "What metrics would you use to evaluate a highly imbalanced classification dataset?"
+    ],
+    "sample_JD_text": "Seeking an ML Engineer to build, scale, and deploy predictive models. You will design machine learning pipelines using PyTorch and Scikit-Learn, optimize models for inference, and work closely with backend engineers to integrate model APIs. Prior experience with Docker and model tracking tools is a plus."
+  },
+  {
     "title": "ML Engineer",
     "required_skills": ["Python", "PyTorch", "Machine Learning", "Scikit-Learn", "SQL"],
     "nice_to_have_skills": ["Docker", "Kubernetes", "MLflow", "TensorFlow", "Transformers"],
@@ -102,5 +115,122 @@
       "Describe a scenario where data contradicted what the product team expected."
     ],
     "sample_JD_text": "Seeking a Product Analyst to drive growth. You will analyze product engagement patterns, track KPIs, write SQL queries to understand user behavior, and collaborate with product managers to launch A/B tests."
+  },
+  {
+    "title": "Data Engineer",
+    "required_skills": ["SQL", "Python", "ETL Pipelines", "Data Warehousing", "Spark"],
+    "nice_to_have_skills": ["Airflow", "Kafka", "Snowflake", "dbt", "Redshift"],
+    "typical_interview_questions": [
+      "Explain the difference between star and snowflake schemas in data modeling.",
+      "How do you handle backfills in a production data pipeline?",
+      "Describe the difference between batch and stream processing.",
+      "How would you optimize a slow-running Spark job?",
+      "What are the benefits of using a column-oriented storage format like Parquet?"
+    ],
+    "sample_JD_text": "We are looking for a Data Engineer to design, build, and maintain our data platform. You will build robust ETL pipelines, optimize data warehouses, and support analytics teams. Strong SQL and Python skills are required."
+  },
+  {
+    "title": "AI/ML Researcher",
+    "required_skills": ["Python", "PyTorch", "Deep Learning", "Mathematics", "Probability"],
+    "nice_to_have_skills": ["Transformers", "Computer Vision", "NLP", "Reinforcement Learning", "Paper Writing"],
+    "typical_interview_questions": [
+      "Explain the mathematical formulation of backpropagation.",
+      "What is the vanishing gradient problem, and how do modern architectures solve it?",
+      "Can you explain the difference between self-attention and cross-attention?",
+      "Describe the difference between contrastive learning and generative modeling.",
+      "How does reinforcement learning differ from standard supervised learning?"
+    ],
+    "sample_JD_text": "Join our AI research lab to push the boundaries of Machine Learning. You will research new deep learning architectures, publish results, and prototype advanced models. Strong mathematical fundamentals are required."
+  },
+  {
+    "title": "Python Developer",
+    "required_skills": ["Python", "Flask", "Django", "OOP", "SQL"],
+    "nice_to_have_skills": ["FastAPI", "pytest", "Docker", "Algorithms", "Caching"],
+    "typical_interview_questions": [
+      "Explain how decorators work in Python and write a simple timing decorator.",
+      "What is the difference between multiprocessing and multithreading in Python?",
+      "How does Python's GIL (Global Interpreter Lock) impact performance?",
+      "Describe the differences between lists, sets, and dictionaries in terms of lookup complexity.",
+      "How do you manage dependencies and virtual environments in a Python project?"
+    ],
+    "sample_JD_text": "We are hiring a Python Developer to write clean, maintainable backend code. You will build REST APIs, work with database engines, and implement core business logic. Proficiency in standard library and frameworks is required."
+  },
+  {
+    "title": "Backend Engineer",
+    "required_skills": ["Java", "Spring Boot", "SQL", "System Design", "Microservices"],
+    "nice_to_have_skills": ["Docker", "Kubernetes", "Redis", "Kafka", "AWS"],
+    "typical_interview_questions": [
+      "Describe the principles of RESTful API design.",
+      "How would you scale a service to handle a sudden surge in traffic?",
+      "Explain the CAP theorem and its implications in distributed systems.",
+      "How do you implement caching to improve response times without stale data issues?",
+      "What is the difference between relational databases and key-value stores?"
+    ],
+    "sample_JD_text": "Seeking a Backend Engineer to join our core systems team. You will build scalable backend services, design distributed databases, and maintain microservice APIs."
+  },
+  {
+    "title": "Full Stack Developer",
+    "required_skills": ["React", "Node.js", "JavaScript", "SQL", "CSS"],
+    "nice_to_have_skills": ["TypeScript", "Next.js", "Express", "Docker", "Tailwind CSS"],
+    "typical_interview_questions": [
+      "How do you secure web applications against Cross-Site Scripting (XSS) attacks?",
+      "Explain the difference between client-side rendering (CSR) and server-side rendering (SSR).",
+      "Describe how you would design a real-time notification system using WebSockets.",
+      "How do you optimize front-to-back assets load times?",
+      "What is CORS and how do you handle it in a production application?"
+    ],
+    "sample_JD_text": "We need a Full Stack Developer to build both interactive client interfaces and robust server applications. Must be comfortable across the full lifecycle from CSS layouts to REST APIs."
+  },
+  {
+    "title": "Business Intelligence Analyst",
+    "required_skills": ["SQL", "Tableau", "PowerBI", "Data Warehousing", "Excel"],
+    "nice_to_have_skills": ["Python", "ETL", "Statistics", "Data Storytelling", "dbt"],
+    "typical_interview_questions": [
+      "How do you design a dashboard that stays clean and actionable for executive decision-makers?",
+      "Explain the difference between facts and dimensions in a data warehouse.",
+      "How do you optimize a slow-loading BI dashboard?",
+      "Describe how you calculate customer lifetime value (CLV) or churn rate.",
+      "What is the difference between OLAP and OLTP systems?"
+    ],
+    "sample_JD_text": "Looking for a BI Analyst to empower data-driven decisions. You will create reports, build dashboard visualizations in Tableau/PowerBI, and maintain analytical tables using SQL."
+  },
+  {
+    "title": "MLOps Engineer",
+    "required_skills": ["Docker", "Kubernetes", "MLflow", "CI/CD", "Python"],
+    "nice_to_have_skills": ["AWS", "Kubeflow", "Airflow", "Terraform", "Monitoring"],
+    "typical_interview_questions": [
+      "How do you monitor ML models in production for data drift or performance decay?",
+      "Explain how a model deployment pipeline works using CI/CD.",
+      "What is model serialization, and which formats do you prefer for production inference?",
+      "How would you scale a model inference API to support thousands of concurrent requests?",
+      "Describe how you configure a GPU cluster for machine learning training."
+    ],
+    "sample_JD_text": "Seeking an MLOps Engineer to bridge the gap between ML researchers and operations. You will manage models, build CI/CD deployment pipelines, and maintain model inference infrastructure."
+  },
+  {
+    "title": "Computer Vision Engineer",
+    "required_skills": ["Python", "PyTorch", "OpenCV", "Deep Learning", "Image Processing"],
+    "nice_to_have_skills": ["TensorRT", "C++", "Docker", "Object Detection", "Segmentation"],
+    "typical_interview_questions": [
+      "Explain how convolution operations extract features in a CNN.",
+      "What is the difference between object detection and semantic segmentation?",
+      "Describe how non-maximum suppression (NMS) works in object detection models.",
+      "How do you handle variation in lighting or orientation in image classification?",
+      "What is transfer learning, and why is it useful in CV models?"
+    ],
+    "sample_JD_text": "Seeking a CV Engineer to build visual processing algorithms. You will train image models using PyTorch, write OpenCV pipelines, and optimize real-time inference on edge devices."
+  },
+  {
+    "title": "NLP Engineer",
+    "required_skills": ["Python", "PyTorch", "Transformers", "NLP", "Hugging Face"],
+    "nice_to_have_skills": ["BERT", "GPT", "Tokenization", "RAG", "Text Classification"],
+    "typical_interview_questions": [
+      "Explain how self-attention weights are computed in a Transformer model.",
+      "What is tokenization, and how do BPE or WordPiece algorithms handle out-of-vocabulary words?",
+      "Describe the difference between fine-tuning and prompt-engineering an LLM.",
+      "How do you handle negation or sarcasm in sentiment analysis models?",
+      "What is the purpose of positional encodings in a Transformer?"
+    ],
+    "sample_JD_text": "We are hiring an NLP Engineer to build advanced text processing models. You will train language models, optimize document search systems, and deploy conversational agents using Hugging Face Transformers."
   }
 ]

@@ -67,7 +67,15 @@ export default function App() {
   // Roles Dropdown
   const [rolesList, setRolesList] = useState([]);
   const [selectedRole, setSelectedRole] = useState('');
+  const [customRoleInput, setCustomRoleInput] = useState('');
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+
+  const getEffectiveRole = () => {
+    if (selectedRole === 'Other (custom)') {
+      return `Other (custom) - ${customRoleInput.trim() || 'Custom Role'}`;
+    }
+    return selectedRole;
+  };
   
   // Gap Analysis
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -101,8 +109,9 @@ export default function App() {
       const res = await fetchWithTimeout(`${API_BASE}/roles`, {}, 10000);
       if (!res.ok) throw new Error("Could not retrieve job roles list.");
       const data = await res.json();
-      setRolesList(data);
-      if (data.length > 0) setSelectedRole(data[0]);
+      const fullList = [...data, "Other (custom)"];
+      setRolesList(fullList);
+      if (fullList.length > 0) setSelectedRole(fullList[0]);
     } catch (err) {
       console.error(err);
       setErrorMessage(formatFetchError(err, "Backend is offline or unreachable. Ensure the FastAPI server is running on port 8000."));
@@ -188,7 +197,7 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           skills: extractedSkills,
-          target_role: selectedRole
+          target_role: getEffectiveRole()
         })
       }, 20000);
       
@@ -221,7 +230,7 @@ export default function App() {
         body: JSON.stringify({
           missing_skills: gapResults.missing,
           partial_skills: gapResults.partial,
-          target_role: selectedRole
+          target_role: getEffectiveRole()
         })
       }, 20000);
       
@@ -256,8 +265,9 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          target_role: selectedRole,
-          history: []
+          target_role: getEffectiveRole(),
+          history: [],
+          candidate_skills: extractedSkills
         })
       }, 20000);
       
@@ -290,8 +300,9 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          target_role: selectedRole,
-          history: updatedHistory
+          target_role: getEffectiveRole(),
+          history: updatedHistory,
+          candidate_skills: extractedSkills
         })
       }, 20000);
       
@@ -339,7 +350,7 @@ export default function App() {
         </div>
         
         {/* Core Global Status / Select Role */}
-        <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="flex flex-col md:flex-row items-end gap-4 w-full md:w-auto">
           <div className="flex flex-col w-full md:w-56">
             <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">
               Select Target Job Role
@@ -358,13 +369,38 @@ export default function App() {
                 setScorecard(null);
               }}
               disabled={isLoadingRoles}
-              className="bg-white border-2 border-black rounded-sm py-1.5 px-3 text-sm text-black font-semibold focus:outline-none focus:border-[#1b4332] transition-colors"
+              className="bg-white border-2 border-black rounded-sm py-1.5 px-3 text-sm text-black font-semibold focus:outline-none focus:border-[#1b4332] transition-colors w-full"
             >
               {rolesList.map((role) => (
                 <option key={role} value={role}>{role}</option>
               ))}
             </select>
           </div>
+
+          {selectedRole === 'Other (custom)' && (
+            <div className="flex flex-col w-full md:w-56">
+              <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">
+                Type Custom Role Title
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Site Reliability Engineer"
+                value={customRoleInput}
+                onChange={(e) => {
+                  setCustomRoleInput(e.target.value);
+                  setGapResults(null);
+                  setLearningPath(null);
+                  // Reset interview states
+                  setInterviewHistory([]);
+                  setLastFeedback('');
+                  setIsInterviewFinished(false);
+                  setInterviewStarted(false);
+                  setScorecard(null);
+                }}
+                className="bg-white border-2 border-black rounded-sm py-1.5 px-3 text-sm text-black font-semibold focus:outline-none focus:border-[#1b4332] transition-colors w-full"
+              />
+            </div>
+          )}
         </div>
       </header>
 
@@ -580,7 +616,7 @@ export default function App() {
                         {isAnalyzing ? (
                           <>
                             <RefreshCw className="h-5 w-5 animate-spin" />
-                            Analyzing Gap Against {selectedRole}...
+                            Analyzing Gap Against {selectedRole === 'Other (custom)' ? customRoleInput || 'Custom Role' : selectedRole}...
                           </>
                         ) : (
                           <>
@@ -600,7 +636,14 @@ export default function App() {
                   <div className="flex justify-between items-center border-b border-black pb-3">
                     <div className="flex items-center gap-2">
                       <Award className="h-5 w-5 text-[#1b4332]" />
-                      <h3 className="text-md font-bold text-gray-900">Analysis vs {selectedRole}</h3>
+                      <h3 className="text-md font-bold text-gray-900">
+                        Analysis vs {selectedRole === 'Other (custom)' ? customRoleInput || 'Custom Role' : selectedRole}
+                      </h3>
+                      {selectedRole === 'Other (custom)' && (
+                        <span className="ml-2 text-[9px] bg-amber-100 text-amber-800 border border-amber-300 font-bold uppercase px-1.5 py-0.5 rounded-sm">
+                          ⚠️ AI-Inferred Estimate
+                        </span>
+                      )}
                     </div>
                     {/* Score badge */}
                     <div className="flex flex-col items-end">
@@ -763,7 +806,7 @@ export default function App() {
                 <Map className="h-6 w-6 text-[#1b4332]" />
                 <div>
                   <h2 className="text-lg font-bold text-gray-905">Personalized Learning Roadmap</h2>
-                  <p className="text-xs text-gray-500">Target Role: {selectedRole}</p>
+                  <p className="text-xs text-gray-500">Target Role: {selectedRole === 'Other (custom)' ? customRoleInput || 'Custom Role' : selectedRole}</p>
                 </div>
               </div>
               
@@ -854,7 +897,7 @@ export default function App() {
               <div className="glass-panel p-6 rounded-sm flex flex-col gap-4">
                 <h3 className="text-md font-bold text-gray-900">Interview Controller</h3>
                 <p className="text-xs text-gray-600">
-                  Conduct a standard 5-question interview tailored to the <span className="font-semibold text-[#1b4332]">{selectedRole}</span> role. Answer questions fully. At the end, you'll receive a mock scorecard detailing strengths and advice.
+                  Conduct a standard 5-question interview tailored to the <span className="font-semibold text-[#1b4332]">{selectedRole === 'Other (custom)' ? customRoleInput || 'Custom Role' : selectedRole}</span> role. Answer questions fully. At the end, you'll receive a mock scorecard detailing strengths and advice.
                 </p>
                 
                 <button

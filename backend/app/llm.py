@@ -6,12 +6,42 @@ import logging
 from dotenv import load_dotenv
 from anthropic import Anthropic, APIError
 
+from typing import Optional
+
 # Setup basic logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load environment variable from .env file if it exists
 load_dotenv()
+
+def detect_meta_request(message: str) -> Optional[str]:
+    """
+    Detects if the user's message is an explicit redirect/meta-request.
+    Returns the target topic if detected, otherwise None.
+    """
+    msg_lower = message.lower().strip()
+    
+    # Common meta-request patterns
+    patterns = [
+        r"ask me about (?:the )?([\w\s\+\#]+)",
+        r"focus on ([\w\s\+\#]+)",
+        r"can we talk about ([\w\s\+\#]+)",
+        r"can we focus on ([\w\s\+\#]+)",
+        r"change topic to ([\w\s\+\#]+)",
+        r"talk about ([\w\s\+\#]+)"
+    ]
+    
+    for pat in patterns:
+        m = re.search(pat, msg_lower)
+        if m:
+            return m.group(1).strip()
+            
+    # Phrases indicating a request to pivot or skip
+    if any(phrase in msg_lower for phrase in ["skip this", "ask something else", "don't know, ask", "i don't know, ask"]):
+        return "another technical topic related to the role"
+        
+    return None
 
 # Verify API key availability
 # Verify API key availability
@@ -43,6 +73,43 @@ def clean_json_text(text: str) -> str:
         return match.group(1).strip()
     return text
 
+def load_skill_taxonomy() -> dict:
+    """
+    Loads the taxonomy JSON mapping standard skills to search patterns.
+    """
+    try:
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        taxonomy_file = os.path.join(base_dir, "data", "skill_taxonomy.json")
+        if os.path.exists(taxonomy_file):
+            with open(taxonomy_file, "r") as f:
+                return json.load(f)
+    except Exception as e:
+        logger.error(f"Error loading skill taxonomy: {str(e)}")
+    return {}
+
+def extract_skills_from_text_via_taxonomy(text: str) -> list:
+    """
+    Performs regex search against the taxonomy definitions to extract skills.
+    """
+    taxonomy = load_skill_taxonomy()
+    found_skills = []
+    if not taxonomy:
+        return found_skills
+        
+    for category, skills in taxonomy.items():
+        for skill_name, patterns in skills.items():
+            for pattern in patterns:
+                # Compile regex with word boundaries if appropriate
+                regex_pattern = pattern if "\\" in pattern or "\\b" in pattern else rf"\b{pattern}\b"
+                
+                # Case sensitivity override for single-letter language "R" to prevent false positives
+                flags = 0 if skill_name == "R" else re.IGNORECASE
+                
+                if re.search(regex_pattern, text, flags):
+                    found_skills.append(skill_name)
+                    break
+    return list(set(found_skills))
+
 def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: bool = False) -> str:
     """
     Generates intelligent mock responses matching the expected schemas when the live LLM API is unavailable.
@@ -52,18 +119,15 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
     
     # 1. Resume Skills Extraction
     if "Resume Parser" in system_prompt or "extract-skills" in prompt or "extract_skills" in prompt or "extract skills" in system_prompt.lower():
-        found_skills = []
-        possible_skills = ["Python", "SQL", "React", "Excel", "HTML", "CSS", "Java", "C++", "JavaScript", "Statistics", "A/B Testing", "Tableau", "PowerBI", "Docker", "Kubernetes", "Git"]
-        for s in possible_skills:
-            if re.search(rf"\b{s}\b", prompt, re.IGNORECASE):
-                found_skills.append(s)
+        found_skills = extract_skills_from_text_via_taxonomy(prompt)
         if not found_skills:
             found_skills = ["Python", "SQL", "Excel", "HTML", "CSS"]
             
         projects = []
         project_matches = re.findall(r"-\s*([^\n]+)", prompt)
         for pm in project_matches:
-            if "project" in pm.lower() or "dashboard" in pm.lower() or "webpage" in pm.lower() or "app" in pm.lower() or "system" in pm.lower():
+            pm_lower = pm.lower()
+            if any(term in pm_lower for term in ["project", "dashboard", "webpage", "app", "system", "ocr", "rag", "ml", "autonomous", "classifier", "detector", "vision"]):
                 projects.append(pm.strip())
         if not projects:
             projects = ["Inventory management dashboard", "Personal portfolio webpage"]
@@ -94,25 +158,40 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
             user_skills = ["Python", "SQL", "Excel"]
             
         target_role = "Data Analyst"
-        role_match = re.search(r"Title:\s*([^\n]+)", prompt)
+        role_match = re.search(r"Target Role:\s*([^\n]+)", prompt) or re.search(r"Title:\s*([^\n]+)", prompt)
         if role_match:
             target_role = role_match.group(1).strip()
             
-        # Parse required and nice to have lists from prompt to ensure 100% strict classification
-        required_match = re.search(r"Required Skills[^:]*:\s*\[(.*?)\]", prompt)
-        nice_match = re.search(r"Nice To Have Skills[^:]*:\s*\[(.*?)\]", prompt)
+        is_custom = "inferred" in system_prompt.lower() or target_role.lower() in ["other", "other (custom)", "custom"] or target_role.startswith("Other")
         
         required = []
-        if required_match:
-            required = [s.strip().strip("'\"") for s in required_match.group(1).split(",") if s.strip()]
-        if not required:
-            required = ["SQL", "Python", "Data Visualization", "Excel", "Statistics"]
-            
         nice_to_have = []
-        if nice_match:
-            nice_to_have = [s.strip().strip("'\"") for s in nice_match.group(1).split(",") if s.strip()]
-        if not nice_to_have:
-            nice_to_have = ["Tableau", "PowerBI", "A/B Testing", "Pandas", "R"]
+        
+        if is_custom:
+            role_clean = target_role.replace("Other (custom) - ", "").strip()
+            if any(term in role_clean.lower() for term in ["reliability", "sre", "infrastructure", "systems engineer"]):
+                required = ["Kubernetes", "Linux", "Docker", "Go", "Bash"]
+                nice_to_have = ["Terraform", "Prometheus", "CI/CD"]
+            elif any(term in role_clean.lower() for term in ["product manager", "pm"]):
+                required = ["Product Roadmap", "SQL", "Market Research", "Agile", "User Stories"]
+                nice_to_have = ["Jira", "A/B Testing", "Data Analysis"]
+            else:
+                required = [f"{role_clean} Core", "System Architecture", "Problem Solving", "Communication", "Technical Design"]
+                nice_to_have = ["Docker", "Git", "Project Management"]
+        else:
+            # Parse required and nice to have lists from prompt to ensure 100% strict classification
+            required_match = re.search(r"Required Skills[^:]*:\s*\[(.*?)\]", prompt)
+            nice_match = re.search(r"Nice To Have Skills[^:]*:\s*\[(.*?)\]", prompt)
+            
+            if required_match:
+                required = [s.strip().strip("'\"") for s in required_match.group(1).split(",") if s.strip()]
+            if not required:
+                required = ["SQL", "Python", "Data Visualization", "Excel", "Statistics"]
+                
+            if nice_match:
+                nice_to_have = [s.strip().strip("'\"") for s in nice_match.group(1).split(",") if s.strip()]
+            if not nice_to_have:
+                nice_to_have = ["Tableau", "PowerBI", "A/B Testing", "Pandas", "R"]
             
         all_skills = required + nice_to_have
         matched = []
@@ -122,7 +201,7 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
         for s in all_skills:
             if any(s.lower() == u.lower() for u in user_skills):
                 matched.append(s)
-            elif s.lower() in ["data visualization", "pandas", "tableau", "excel"] and any(u.lower() in ["python", "sql", "excel"] for u in user_skills):
+            elif s.lower() in ["data visualization", "pandas", "tableau", "excel", "git", "docker"] and any(u.lower() in ["python", "sql", "excel"] for u in user_skills):
                 partial.append(s)
             else:
                 missing.append(s)
@@ -141,6 +220,8 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
         match_pct = round(match_pct, 1)
         
         summary = f"The candidate has strong foundational skills matching the {target_role} role (namely {', '.join(matched) if matched else 'none'}). However, there are gaps in core areas: {', '.join(missing)}."
+        if is_custom:
+            summary += " Note: This is an AI-inferred estimate because a custom role was selected."
         
         resp = {
             "matched_skills": matched,
@@ -207,14 +288,17 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
 
     # 5. Mid-interview Turn
     elif "Mock Interview" in system_prompt or "conduct a short 5-question" in system_prompt or "interview" in system_prompt:
+        target_role = "Data Analyst"
+        role_match = re.search(r"for the '([^']+)' position", system_prompt) or re.search(r"role '([^']+)'", system_prompt) or re.search(r"interview for the '([^']+)'", system_prompt)
+        if role_match:
+            target_role = role_match.group(1)
+
         # Check if this is the start turn
         if "Start the mock interview." in prompt:
-            target_role = "Data Analyst"
-            role_match = re.search(r"interview for the '([^']+)'", system_prompt) or re.search(r"position '([^']+)'", system_prompt)
-            if role_match:
-                target_role = role_match.group(1)
-            
             first_q = f"Welcome! Let's begin the mock interview for the {target_role} position. Can you explain the difference between a LEFT JOIN and an INNER JOIN in SQL, and when you would prefer one over the other?"
+            if any(term in target_role.lower() for term in ["machine learning", "ml", "data scientist", "data science", "computer vision", "nlp", "researcher"]):
+                first_q = f"Welcome! Let's begin the mock interview for the {target_role} position. Can you explain the difference between overfitting and underfitting in Machine Learning, and how you would prevent overfitting?"
+            
             resp = {
                 "feedback": None,
                 "next_message": first_q,
@@ -228,43 +312,74 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
         last_answer = ""
         user_turns = [line.split("USER:", 1)[1].strip() for line in prompt.split("\n") if "USER:" in line]
         if user_turns:
-            last_answer = user_turns[-1].lower()
+            last_answer = user_turns[-1]
 
-        # Determine feedback based on which question was just answered (num_answers represents the question number that was answered)
+        # Intent Detection: check for meta-redirect request
+        pivot_topic = detect_meta_request(last_answer)
+        if pivot_topic:
+            feedback = f"Acknowledged. Let's pivot to focus on your requested topic: {pivot_topic}."
+            pivot_lower = pivot_topic.lower()
+            if "python" in pivot_lower:
+                next_q = "Understood! Let's talk about Python. Can you explain the difference between list comprehensions and generators in Python, and when you would choose one over the other?"
+            elif "ml" in pivot_lower or "machine learning" in pivot_lower or "overfitting" in pivot_lower:
+                next_q = "No problem! Let's focus on Machine Learning. Can you explain how cross-validation works and why it is crucial for model evaluation?"
+            elif "rag" in pivot_lower or "vector" in pivot_lower:
+                next_q = "Sure! Let's focus on Retrieval-Augmented Generation (RAG). Can you explain how document chunking and vector embeddings impact search retrieval accuracy?"
+            else:
+                next_q = f"Sure! Let's focus on {pivot_topic}. Can you describe a key concept or standard tool you use when working with {pivot_topic}?"
+                
+            resp = {
+                "feedback": feedback,
+                "next_message": next_q,
+                "is_final": False
+            }
+            return json.dumps(resp) if is_json else next_q
+
+        # Determine feedback based on standard questions answered
         feedback = "Great answer! You showed good clarity and covered the key aspects of the question."
+        last_answer_lower = last_answer.lower()
         
         if num_answers == 1:
-            # User answered Question 1: LEFT JOIN vs INNER JOIN
-            if any(w in last_answer for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip", "python"]):
-                feedback = "It seems you're unsure about this topic. A LEFT JOIN returns all rows from the left table plus matching rows from the right, whereas an INNER JOIN only returns rows that have matching values in both tables."
-            elif any(w in last_answer for w in ["left", "inner", "join", "table", "match"]):
-                feedback = "Good explanation of the difference! You correctly noted how LEFT JOIN preserves unmatched rows from the left table while INNER JOIN only keeps matching rows."
+            # User answered Question 1: LEFT JOIN vs INNER JOIN or Overfitting vs Underfitting
+            if any(w in last_answer_lower for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip"]):
+                if "overfit" in prompt.lower():
+                    feedback = "It seems you're unsure. Overfitting happens when a model learns training data noise too well and fails to generalize; underfitting is when the model is too simple. You can prevent overfitting using regularization, dropout, or more data."
+                else:
+                    feedback = "It seems you're unsure about this topic. A LEFT JOIN returns all rows from the left table plus matching rows from the right, whereas an INNER JOIN only returns rows that have matching values in both tables."
+            elif "overfit" in prompt.lower():
+                if any(w in last_answer_lower for w in ["generalize", "noise", "regularization", "dropout", "data", "test", "train"]):
+                    feedback = "Good explanation of model generalization and techniques to prevent overfitting (like regularization or dropout)."
+                else:
+                    feedback = "Overfitting is when a model fits the training set too closely; underfitting is failing to capture the underlying pattern. Try using regularization to improve generalization."
             else:
-                feedback = "A SQL join combines rows from tables. Try to review how LEFT JOIN returns all left-table rows, whereas INNER JOIN requires a match on both sides."
+                if any(w in last_answer_lower for w in ["left", "inner", "join", "table", "match"]):
+                    feedback = "Good explanation of the difference! You correctly noted how LEFT JOIN preserves unmatched rows from the left table while INNER JOIN only keeps matching rows."
+                else:
+                    feedback = "A SQL join combines rows from tables. Try to review how LEFT JOIN returns all left-table rows, whereas INNER JOIN requires a match on both sides."
                 
         elif num_answers == 2:
             # User answered Question 2: SQL vs NoSQL
-            if any(w in last_answer for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip", "python"]):
+            if any(w in last_answer_lower for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip"]):
                 feedback = "SQL databases are relational and structured (e.g. PostgreSQL), while NoSQL databases are non-relational and schema-less (e.g. MongoDB). Your answer did not highlight this difference."
-            elif any(w in last_answer for w in ["relation", "table", "schema", "document", "sql", "nosql", "mongo"]):
+            elif any(w in last_answer_lower for w in ["relation", "table", "schema", "document", "sql", "nosql", "mongo"]):
                 feedback = "Excellent summary of SQL vs NoSQL! You correctly identified the relational, schema-bound nature of SQL compared to the flexible, document-based structure of NoSQL."
             else:
                 feedback = "A key difference is that SQL databases are relational and structured, whereas NoSQL databases are non-relational and schema-less. Consider revising these database models."
                 
         elif num_answers == 3:
             # User answered Question 3: Concurrency / Async
-            if any(w in last_answer for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip"]):
+            if any(w in last_answer_lower for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip"]):
                 feedback = "Concurrency is important for performance. In Python, this is typically handled via async/await, threading, or multiprocessing. Let's practice implementing these concepts."
-            elif any(w in last_answer for w in ["async", "await", "thread", "process", "lock", "concurrency", "promise", "callback"]):
+            elif any(w in last_answer_lower for w in ["async", "await", "thread", "process", "lock", "concurrency", "promise", "callback"]):
                 feedback = "Great response! You showed good familiarity with concurrency mechanisms and how asynchronous operations prevent blocking tasks."
             else:
                 feedback = "Make sure to review async programming patterns, such as threads, processes, or async/await syntax, which are vital for non-blocking I/O operations."
                 
         elif num_answers == 4:
             # User answered Question 4: Clean code and testing
-            if any(w in last_answer for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip"]):
+            if any(w in last_answer_lower for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip"]):
                 feedback = "Writing maintainable code involves using clean principles (like SOLID) and testing libraries (like pytest or unittest). This is a crucial skill to master."
-            elif any(w in last_answer for w in ["clean", "pytest", "test", "lint", "solid", "dry", "format", "git", "unittest"]):
+            elif any(w in last_answer_lower for w in ["clean", "pytest", "test", "lint", "solid", "dry", "format", "git", "unittest"]):
                 feedback = "Solid response! Emphasizing readability, modular design, and standard testing libraries like pytest is key to production-grade engineering."
             else:
                 feedback = "Good practices include writing modular functions, following standard style guides (like PEP 8), and using testing frameworks (like pytest) to ensure code reliability."
@@ -276,8 +391,12 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
         next_q = f"Question {num_answers + 1}: Can you describe a challenging technical problem you solved recently and how you approached it?"
         if num_answers == 1:
             next_q = "Question 2: How would you describe the difference between a SQL and NoSQL database, and when would you use each?"
+            if "overfit" in prompt.lower():
+                next_q = "Question 2: In Machine Learning, what is the bias-variance tradeoff, and how does it relate to overfitting and underfitting?"
         elif num_answers == 2:
             next_q = "Question 3: Can you explain how you handle concurrency or asynchronous tasks in your favorite programming language?"
+            if "overfit" in prompt.lower():
+                next_q = "Question 3: Can you explain the difference between L1 (Lasso) and L2 (Ridge) regularization, and how they prevent overfitting?"
         elif num_answers == 3:
             next_q = "Question 4: What is your approach to writing clean, maintainable code, and what tools do you use for testing?"
         elif num_answers == 4:
@@ -291,7 +410,7 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
         return json.dumps(resp) if is_json else next_q
         
     target_role = "Data Analyst"
-    role_match = re.search(r"role '([^']+)'", system_prompt)
+    role_match = re.search(r"for the '([^']+)' position", system_prompt) or re.search(r"role '([^']+)'", system_prompt)
     if role_match:
         target_role = role_match.group(1)
     
