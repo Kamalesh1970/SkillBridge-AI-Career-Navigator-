@@ -196,7 +196,7 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
         return json.dumps({"roadmap": roadmap}) if is_json else f"Roadmap for: {', '.join(missing_skills)}"
 
     # 4. Final Interview Scorecard
-    elif "performance evaluation" in system_prompt or "Scorecard" in system_prompt or "is_final" in system_prompt or "is_final\": true" in system_prompt:
+    elif "performance evaluation" in system_prompt or "Scorecard" in system_prompt or '"is_final": true' in system_prompt or '"is_final":true' in system_prompt.replace(" ", ""):
         scorecard = "### Mock Interview Scorecard\n\n**Strengths:**\n- Good understanding of core concepts.\n- Clear communication and structured reasoning.\n\n**Weaknesses/Gaps:**\n- Could expand more on design patterns and architectural tradeoffs.\n\n**Actionable Tips:**\n- Study system design patterns and practice mock coding problems."
         resp = {
             "feedback": "Overall solid performance in answering the mock interview questions.",
@@ -223,6 +223,56 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
             return json.dumps(resp) if is_json else first_q
             
         num_answers = prompt.count("USER:")
+        
+        # Extract last answer
+        last_answer = ""
+        user_turns = [line.split("USER:", 1)[1].strip() for line in prompt.split("\n") if "USER:" in line]
+        if user_turns:
+            last_answer = user_turns[-1].lower()
+
+        # Determine feedback based on which question was just answered (num_answers represents the question number that was answered)
+        feedback = "Great answer! You showed good clarity and covered the key aspects of the question."
+        
+        if num_answers == 1:
+            # User answered Question 1: LEFT JOIN vs INNER JOIN
+            if any(w in last_answer for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip", "python"]):
+                feedback = "It seems you're unsure about this topic. A LEFT JOIN returns all rows from the left table plus matching rows from the right, whereas an INNER JOIN only returns rows that have matching values in both tables."
+            elif any(w in last_answer for w in ["left", "inner", "join", "table", "match"]):
+                feedback = "Good explanation of the difference! You correctly noted how LEFT JOIN preserves unmatched rows from the left table while INNER JOIN only keeps matching rows."
+            else:
+                feedback = "A SQL join combines rows from tables. Try to review how LEFT JOIN returns all left-table rows, whereas INNER JOIN requires a match on both sides."
+                
+        elif num_answers == 2:
+            # User answered Question 2: SQL vs NoSQL
+            if any(w in last_answer for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip", "python"]):
+                feedback = "SQL databases are relational and structured (e.g. PostgreSQL), while NoSQL databases are non-relational and schema-less (e.g. MongoDB). Your answer did not highlight this difference."
+            elif any(w in last_answer for w in ["relation", "table", "schema", "document", "sql", "nosql", "mongo"]):
+                feedback = "Excellent summary of SQL vs NoSQL! You correctly identified the relational, schema-bound nature of SQL compared to the flexible, document-based structure of NoSQL."
+            else:
+                feedback = "A key difference is that SQL databases are relational and structured, whereas NoSQL databases are non-relational and schema-less. Consider revising these database models."
+                
+        elif num_answers == 3:
+            # User answered Question 3: Concurrency / Async
+            if any(w in last_answer for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip"]):
+                feedback = "Concurrency is important for performance. In Python, this is typically handled via async/await, threading, or multiprocessing. Let's practice implementing these concepts."
+            elif any(w in last_answer for w in ["async", "await", "thread", "process", "lock", "concurrency", "promise", "callback"]):
+                feedback = "Great response! You showed good familiarity with concurrency mechanisms and how asynchronous operations prevent blocking tasks."
+            else:
+                feedback = "Make sure to review async programming patterns, such as threads, processes, or async/await syntax, which are vital for non-blocking I/O operations."
+                
+        elif num_answers == 4:
+            # User answered Question 4: Clean code and testing
+            if any(w in last_answer for w in ["don't know", "dont know", "no idea", "unsure", "not sure", "skip"]):
+                feedback = "Writing maintainable code involves using clean principles (like SOLID) and testing libraries (like pytest or unittest). This is a crucial skill to master."
+            elif any(w in last_answer for w in ["clean", "pytest", "test", "lint", "solid", "dry", "format", "git", "unittest"]):
+                feedback = "Solid response! Emphasizing readability, modular design, and standard testing libraries like pytest is key to production-grade engineering."
+            else:
+                feedback = "Good practices include writing modular functions, following standard style guides (like PEP 8), and using testing frameworks (like pytest) to ensure code reliability."
+                
+        elif num_answers == 5:
+            # User answered Question 5: Questions/Project
+            feedback = "Thank you for sharing your experience and highlighting your project interests. Let's move on to the evaluation."
+
         next_q = f"Question {num_answers + 1}: Can you describe a challenging technical problem you solved recently and how you approached it?"
         if num_answers == 1:
             next_q = "Question 2: How would you describe the difference between a SQL and NoSQL database, and when would you use each?"
@@ -234,7 +284,7 @@ def generate_mock_llm_response(prompt: str, system_prompt: str = None, is_json: 
             next_q = "Question 5: Do you have any questions for us, or is there any specific project you'd like to highlight?"
             
         resp = {
-            "feedback": "Great answer! You showed good clarity and covered the key aspects of the question.",
+            "feedback": feedback,
             "next_message": next_q,
             "is_final": False
         }
