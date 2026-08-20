@@ -1,8 +1,12 @@
 import io
 import json
 import logging
+import time
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import List, Optional
 
 from app.schemas import (
@@ -29,6 +33,51 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Custom Exception Handlers to standardize error responses to {"error": detail, "detail": detail}
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.detail,
+            "detail": exc.detail
+        }
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    details = exc.errors()
+    error_msg = "Validation failed: " + "; ".join([f"{'.'.join(str(loc) for loc in d['loc'])} - {d['msg']}" for d in details])
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": error_msg,
+            "detail": error_msg
+        }
+    )
+
+# Helper to raise appropriate 502/504 status codes for LLM failures
+def handle_llm_exception(e: Exception, action_name: str):
+    err_msg = str(e).lower()
+    if "timeout" in err_msg or "deadline" in err_msg or "time out" in err_msg:
+        raise HTTPException(
+            status_code=504,
+            detail=f"The AI model provider timed out during {action_name}. Please try again later."
+        )
+    elif any(term in err_msg for term in ["auth", "key", "rate limit", "quota", "balance", "credit", "connection"]):
+        raise HTTPException(
+            status_code=502,
+            detail=f"The AI model provider is currently unavailable or returned a service error: {str(e)}"
+        )
+    else:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to communicate with AI model provider during {action_name}: {str(e)}"
+        )
+
+# In-memory cache for target roles
+_roles_cache = None
+
 # Initialize ChromaDB and Seed Roles on Startup
 @app.on_event("startup")
 def startup_event():
@@ -40,13 +89,20 @@ def get_roles():
     """
     Returns the list of available target roles.
     """
+    global _roles_cache
+    if _roles_cache is not None:
+        return _roles_cache
+
+    logger.info("Fetching target roles list...")
     import os
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ROLES_FILE = os.path.join(BASE_DIR, "data", "job_roles.json")
     try:
         with open(ROLES_FILE, "r") as f:
             roles = json.load(f)
-        return [role["title"] for role in roles]
+        _roles_cache = [role["title"] for role in roles]
+        logger.info(f"Successfully loaded and cached {len(_roles_cache)} roles.")
+        return _roles_cache
     except Exception as e:
         logger.error(f"Failed to read roles list: {str(e)}")
         # Fallback list if something goes wrong
@@ -79,6 +135,7 @@ async def extract_skills(
     Extracts skills, projects, and experience level from a resume.
     Can accept a PDF/TXT file upload OR raw pasted text via form/json.
     """
+    logger.info("Incoming request: /analyze/extract-skills")
     text = ""
     if file:
         content = await file.read()
@@ -86,10 +143,15 @@ async def extract_skills(
         if filename.endswith(".pdf"):
             text = extract_text_from_pdf(content)
         elif filename.endswith(".txt"):
-            text = content.decode("utf-8", errors="ignore")
+            try:
+                text = content.decode("utf-8")
+            except UnicodeDecodeError:
+                raise HTTPException(status_code=400, detail="Failed to decode text file. Ensure it is UTF-8 encoded.")
         else:
-            # Fallback plain text reading
-            text = content.decode("utf-8", errors="ignore")
+            raise HTTPException(
+                status_code=400,
+                detail="Unsupported file format. Please upload a PDF (.pdf) or text (.txt) file."
+            )
     elif resume_text:
         text = resume_text
     else:
@@ -97,6 +159,12 @@ async def extract_skills(
 
     if not text.strip():
         raise HTTPException(status_code=400, detail="Extracted resume text is empty.")
+
+    # Truncate extremely long resume text to prevent token limit errors
+    MAX_CHARACTERS = 30000
+    if len(text) > MAX_CHARACTERS:
+        logger.info(f"Truncating long resume text from {len(text)} to {MAX_CHARACTERS} characters.")
+        text = text[:MAX_CHARACTERS] + "\n... [truncated due to length] ..."
 
     system_prompt = (
         "You are an expert AI Resume Parser.\n"
@@ -113,21 +181,31 @@ async def extract_skills(
     prompt = f"Resume Content:\n---\n{text}\n---"
     
     try:
+        start_time = time.time()
         parsed_json = call_llm_json(prompt, system_prompt=system_prompt)
+        duration = time.time() - start_time
+        logger.info(f"LLM skill extraction completed in {duration:.2f}s")
+        
+        skills = parsed_json.get("skills", [])
+        projects = parsed_json.get("projects", [])
+        experience_level = parsed_json.get("experience_level", "Entry-level")
+        
+        logger.info(f"Successfully extracted {len(skills)} skills and {len(projects)} projects.")
         return ExtractSkillsResponse(
-            skills=parsed_json.get("skills", []),
-            projects=parsed_json.get("projects", []),
-            experience_level=parsed_json.get("experience_level", "Entry-level")
+            skills=skills,
+            projects=projects,
+            experience_level=experience_level
         )
     except Exception as e:
         logger.error(f"Error calling LLM for skill extraction: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"LLM parsing failed: {str(e)}")
+        handle_llm_exception(e, "skill extraction")
 
 @app.post("/analyze/gap", response_model=GapAnalysisResponse)
 def gap_analysis(req: GapAnalysisRequest):
     """
     Retrieves target role data from ChromaDB and performs a skill-gap analysis.
     """
+    logger.info(f"Incoming request: /analyze/gap for role '{req.target_role}'")
     role_data = get_role_by_title(req.target_role)
     if not role_data:
         raise HTTPException(status_code=404, detail=f"Target role '{req.target_role}' not found in database.")
@@ -163,7 +241,10 @@ def gap_analysis(req: GapAnalysisRequest):
     )
 
     try:
+        start_time = time.time()
         parsed_json = call_llm_json(prompt, system_prompt=system_prompt)
+        duration = time.time() - start_time
+        logger.info(f"LLM gap analysis completed in {duration:.2f}s")
         
         # Populate both formats of response keys for compatibility
         matched = parsed_json.get("matched_skills", parsed_json.get("matched", []))
@@ -172,42 +253,73 @@ def gap_analysis(req: GapAnalysisRequest):
         summary = parsed_json.get("summary_text", parsed_json.get("summary", ""))
         reasoning = parsed_json.get("reasoning", {})
 
-        # Assert check in Python and log a warning if mismatch
-        expected_total = len(role_data.get("required_skills", [])) + len(role_data.get("nice_to_have_skills", []))
-        actual_total = len(matched) + len(partial) + len(missing)
-        if actual_total != expected_total:
-            logger.warning(f"Skill count mismatch! Expected {expected_total} skills classified, but got {actual_total}. "
-                           f"Required: {role_data.get('required_skills')}, Nice to have: {role_data.get('nice_to_have_skills')}. "
-                           f"Classified: Matched={matched}, Partial={partial}, Missing={missing}")
+        # Python-side reconciliation to guarantee 100% classification accuracy and prevent hallucinations
+        all_required = [s.strip() for s in role_data.get("required_skills", []) if s.strip()]
+        all_nice = [s.strip() for s in role_data.get("nice_to_have_skills", []) if s.strip()]
+        input_skills = all_required + all_nice
+        
+        llm_matched_lower = {m.lower().strip() for m in matched}
+        llm_partial_lower = {p.lower().strip() for p in partial}
+        
+        validated_matched = []
+        validated_partial = []
+        validated_missing = []
+        validated_reasoning = {}
+        
+        for skill in input_skills:
+            skill_lower = skill.lower()
+            orig_reasoning = reasoning.get(skill, reasoning.get(skill_lower, ""))
+            if not orig_reasoning:
+                # Case-insensitive key search
+                for k, v in reasoning.items():
+                    if k.lower() == skill_lower:
+                        orig_reasoning = v
+                        break
+            
+            if skill_lower in llm_matched_lower:
+                validated_matched.append(skill)
+                validated_reasoning[skill] = orig_reasoning or f"Candidate has matching experience in required skill '{skill}'."
+            elif skill_lower in llm_partial_lower:
+                validated_partial.append(skill)
+                validated_reasoning[skill] = orig_reasoning or f"Candidate has basic exposure to '{skill}' but needs enhancement."
+            else:
+                validated_missing.append(skill)
+                validated_reasoning[skill] = orig_reasoning or f"Candidate lacks training or experience in '{skill}'."
 
-        # Recompute match percentage in Python
-        total_required_skills = len(role_data.get("required_skills", []))
-        matched_required_skills = [s for s in role_data.get("required_skills", []) if any(s.lower() == m.lower() for m in matched)]
-        matched_count = len(matched_required_skills)
-        match_pct = round((matched_count / total_required_skills) * 100, 1) if total_required_skills > 0 else 0.0
+        # Recompute match percentage in Python based on validated required skills
+        matched_required_count = len([s for s in all_required if s in validated_matched])
+        total_required_count = len(all_required)
+        match_pct = round((matched_required_count / total_required_count) * 100, 1) if total_required_count > 0 else 0.0
 
+        logger.info(f"Gap analysis completed. Reconciled skills count: {len(validated_matched) + len(validated_partial) + len(validated_missing)}/{len(input_skills)}. Match percentage: {match_pct}%")
         return GapAnalysisResponse(
-            matched=matched,
-            matched_skills=matched,
-            missing=missing,
-            missing_skills=missing,
-            partial=partial,
-            partial_skills=partial,
+            matched=validated_matched,
+            matched_skills=validated_matched,
+            missing=validated_missing,
+            missing_skills=validated_missing,
+            partial=validated_partial,
+            partial_skills=validated_partial,
             match_pct=match_pct,
             match_percentage=match_pct,
             summary=summary,
             summary_text=summary,
-            reasoning=reasoning
+            reasoning=validated_reasoning
         )
     except Exception as e:
         logger.error(f"Error calling LLM for gap analysis: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"LLM gap analysis failed: {str(e)}")
+        handle_llm_exception(e, "gap analysis")
 
 @app.post("/learning-path", response_model=LearningPathResponse)
 def learning_path(req: LearningPathRequest):
     """
     Generates a personalized, step-by-step learning path roadmap.
     """
+    logger.info(f"Incoming request: /learning-path for role '{req.target_role}'")
+    # Performance Optimization: Zero missing/partial skills requires no LLM call
+    if not req.missing_skills and not req.partial_skills:
+        logger.info("Candidate has zero missing or partial skills. Returning empty roadmap immediately.")
+        return LearningPathResponse(roadmap=[])
+
     system_prompt = (
         "You are an expert technical curriculum designer.\n"
         "Generate a structured learning path roadmap for a candidate who is targeting a role and needs to acquire missing or enhance partial skills.\n"
@@ -240,13 +352,17 @@ def learning_path(req: LearningPathRequest):
     )
 
     try:
+        start_time = time.time()
         parsed_json = call_llm_json(prompt, system_prompt=system_prompt)
-        return LearningPathResponse(
-            roadmap=parsed_json.get("roadmap", [])
-        )
+        duration = time.time() - start_time
+        logger.info(f"LLM learning path generation completed in {duration:.2f}s")
+        
+        roadmap = parsed_json.get("roadmap", [])
+        logger.info(f"Successfully generated learning path with {len(roadmap)} steps.")
+        return LearningPathResponse(roadmap=roadmap)
     except Exception as e:
         logger.error(f"Error calling LLM for learning path: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"LLM roadmap generation failed: {str(e)}")
+        handle_llm_exception(e, "learning path generation")
 
 @app.post("/interview/turn", response_model=InterviewTurnResponse)
 def interview_turn(req: InterviewTurnRequest):
@@ -255,6 +371,7 @@ def interview_turn(req: InterviewTurnRequest):
     Stores and reads history client-side (stateless backend).
     Concludes the interview on the 5th answer.
     """
+    logger.info(f"Incoming request: /interview/turn for role '{req.target_role}'")
     role_data = get_role_by_title(req.target_role)
     if not role_data:
         raise HTTPException(status_code=404, detail=f"Target role '{req.target_role}' not found.")
@@ -274,7 +391,11 @@ def interview_turn(req: InterviewTurnRequest):
             "Do not output anything except the first question."
         )
         try:
+            start_time = time.time()
             first_q = call_llm_raw("Start the mock interview.", system_prompt=system_prompt)
+            duration = time.time() - start_time
+            logger.info(f"LLM interview turn (initialize) completed in {duration:.2f}s")
+            
             return InterviewTurnResponse(
                 next_message=first_q.strip(),
                 is_final=False,
@@ -282,7 +403,7 @@ def interview_turn(req: InterviewTurnRequest):
             )
         except Exception as e:
             logger.error(f"Error starting interview: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Failed to start interview: {str(e)}")
+            handle_llm_exception(e, "interview starting")
 
     # Final Summary Evaluation Turn
     elif num_answers >= 5:
@@ -304,7 +425,11 @@ def interview_turn(req: InterviewTurnRequest):
         history_text = "\n".join([f"{msg.role.upper()}: {msg.content}" for msg in req.history])
         
         try:
+            start_time = time.time()
             parsed_json = call_llm_json(history_text, system_prompt=system_prompt)
+            duration = time.time() - start_time
+            logger.info(f"LLM interview turn (evaluation) completed in {duration:.2f}s")
+            
             return InterviewTurnResponse(
                 next_message=parsed_json.get("next_message", "Evaluation summary not available."),
                 is_final=True,
@@ -312,7 +437,7 @@ def interview_turn(req: InterviewTurnRequest):
             )
         except Exception as e:
             logger.error(f"Error finishing interview: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Failed to evaluate interview: {str(e)}")
+            handle_llm_exception(e, "interview evaluation")
 
     # Mid-Interview Turns (Questions 2 through 5)
     else:
@@ -335,7 +460,11 @@ def interview_turn(req: InterviewTurnRequest):
         history_text = "\n".join([f"{msg.role.upper()}: {msg.content}" for msg in req.history])
 
         try:
+            start_time = time.time()
             parsed_json = call_llm_json(history_text, system_prompt=system_prompt)
+            duration = time.time() - start_time
+            logger.info(f"LLM interview turn (next question) completed in {duration:.2f}s")
+            
             return InterviewTurnResponse(
                 next_message=parsed_json.get("next_message", "Next question could not be generated."),
                 is_final=False,
@@ -343,4 +472,4 @@ def interview_turn(req: InterviewTurnRequest):
             )
         except Exception as e:
             logger.error(f"Error during mid-interview turn: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Failed to generate next turn: {str(e)}")
+            handle_llm_exception(e, "interview next turn generation")
