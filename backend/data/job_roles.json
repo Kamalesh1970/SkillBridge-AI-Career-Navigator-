@@ -1,0 +1,106 @@
+[
+  {
+    "title": "Data Analyst",
+    "required_skills": ["SQL", "Python", "Data Visualization", "Excel", "Statistics"],
+    "nice_to_have_skills": ["Tableau", "PowerBI", "A/B Testing", "Pandas", "R"],
+    "typical_interview_questions": [
+      "Explain the difference between a LEFT JOIN and an INNER JOIN in SQL.",
+      "How would you handle missing or corrupt data in a dataset before analysis?",
+      "Can you describe a time you translated complex data findings into business insights?",
+      "What is the difference between descriptive and predictive analytics?",
+      "How do you design a SQL query to find the second highest salary in an employees table?"
+    ],
+    "sample_JD_text": "We are looking for a Data Analyst to join our team. You will write complex SQL queries, analyze user behavior, build dashboards in Tableau/PowerBI, and translate analytical insights into concrete business suggestions. Must be strong with SQL, python, and statistical basics."
+  },
+  {
+    "title": "ML Engineer",
+    "required_skills": ["Python", "PyTorch", "Machine Learning", "Scikit-Learn", "SQL"],
+    "nice_to_have_skills": ["Docker", "Kubernetes", "MLflow", "TensorFlow", "Transformers"],
+    "typical_interview_questions": [
+      "What is overfitting, and how do you prevent it in a deep learning model?",
+      "Explain the bias-variance tradeoff.",
+      "How do you deploy a machine learning model to a production environment?",
+      "Describe how a Transformer-based language model works under the hood.",
+      "What metrics would you use to evaluate a highly imbalanced classification dataset?"
+    ],
+    "sample_JD_text": "Seeking an ML Engineer to build, scale, and deploy predictive models. You will design machine learning pipelines using PyTorch and Scikit-Learn, optimize models for inference, and work closely with backend engineers to integrate model APIs. Prior experience with Docker and model tracking tools is a plus."
+  },
+  {
+    "title": "Frontend Developer",
+    "required_skills": ["React", "JavaScript", "HTML", "CSS", "TypeScript"],
+    "nice_to_have_skills": ["Tailwind CSS", "Redux", "Next.js", "Web Performance Optimization", "Jest"],
+    "typical_interview_questions": [
+      "Explain how React's Virtual DOM works.",
+      "What is the difference between state and props in React?",
+      "How do you optimize a React web page that is sluggish or has unnecessary re-renders?",
+      "Explain CSS box model and Flexbox/Grid layouts.",
+      "What is the difference between local storage, session storage, and cookies?"
+    ],
+    "sample_JD_text": "Join us as a Frontend Developer to build beautiful, responsive user interfaces. You will translate wireframes and designs into high-quality React code, optimize web performance, and implement state management patterns using TypeScript."
+  },
+  {
+    "title": "Backend Developer",
+    "required_skills": ["Python", "FastAPI", "SQL", "RESTful APIs", "PostgreSQL"],
+    "nice_to_have_skills": ["Redis", "Docker", "Celery", "System Design", "AWS"],
+    "typical_interview_questions": [
+      "Describe the HTTP status codes 200, 201, 400, 401, 403, and 500.",
+      "How do you design a database schema to handle a one-to-many relationship?",
+      "Explain the difference between synchronous and asynchronous request handling in FastAPI.",
+      "What is database indexing and how does it improve query performance?",
+      "How do you handle API authentication and secure sensitive endpoints?"
+    ],
+    "sample_JD_text": "We are seeking a Backend Developer to build scalable backend services. You will design database schemas, write robust endpoints using FastAPI, optimize SQL queries, and deploy web applications to AWS using Docker containerization."
+  },
+  {
+    "title": "DevOps Engineer",
+    "required_skills": ["Linux", "Docker", "CI/CD", "AWS", "Bash Scripting"],
+    "nice_to_have_skills": ["Terraform", "Kubernetes", "Ansible", "Prometheus", "Nginx"],
+    "typical_interview_questions": [
+      "Explain the lifecycle of a Docker container.",
+      "How would you setup a secure multi-stage CI/CD pipeline?",
+      "What is Infrastructure as Code (IaC) and why is it useful?",
+      "How do you troubleshoot a server that has run out of disk space or memory?",
+      "Explain the difference between horizontal and vertical scaling."
+    ],
+    "sample_JD_text": "Looking for a DevOps Engineer to manage our infrastructure and deployment pipelines. You will write CI/CD pipelines, configure Docker containers, monitor server health, and manage cloud services on AWS using Terraform."
+  },
+  {
+    "title": "Data Scientist",
+    "required_skills": ["Python", "Statistics", "Machine Learning", "Data Analysis", "SQL"],
+    "nice_to_have_skills": ["Jupyter Notebooks", "A/B Testing", "Spark", "Pandas", "seaborn"],
+    "typical_interview_questions": [
+      "Explain the difference between a t-test and a chi-square test.",
+      "How do you design an A/B test for a new feature implementation?",
+      "What is the difference between L1 (Lasso) and L2 (Ridge) regularization?",
+      "How would you explain a random forest classifier to a non-technical stakeholder?",
+      "How do you handle collinearity in a regression model?"
+    ],
+    "sample_JD_text": "Join our team as a Data Scientist. You will formulate business questions, design statistical tests, write Python/SQL queries to extract insights, and present data-driven narratives to senior management. Experience with predictive modeling is key."
+  },
+  {
+    "title": "QA Engineer",
+    "required_skills": ["Manual Testing", "Python", "Selenium", "Test Cases", "API Testing"],
+    "nice_to_have_skills": ["Postman", "Playwright", "CI/CD", "Load Testing", "Jira"],
+    "typical_interview_questions": [
+      "What is the difference between regression testing and smoke testing?",
+      "How do you write a test plan for a new login screen?",
+      "Explain how you would test a REST API endpoint.",
+      "What is boundary value analysis in software testing?",
+      "How do you automate a user login flow using Selenium or Playwright?"
+    ],
+    "sample_JD_text": "We are hiring a QA Engineer to ensure software quality. You will write test plans, perform manual testing, build automated test suites using Python/Selenium, and report defects through Jira."
+  },
+  {
+    "title": "Product Analyst",
+    "required_skills": ["SQL", "Product Metrics", "Data Visualization", "Excel", "Communication"],
+    "nice_to_have_skills": ["Mixpanel", "Google Analytics", "A/B Testing", "Python", "Product Sense"],
+    "typical_interview_questions": [
+      "What is retention rate and how is it calculated?",
+      "How would you measure the success of a newly launched feature?",
+      "Which key performance indicators (KPIs) would you track for an e-commerce platform?",
+      "How would you write a query to compute daily active users (DAU)?",
+      "Describe a scenario where data contradicted what the product team expected."
+    ],
+    "sample_JD_text": "Seeking a Product Analyst to drive growth. You will analyze product engagement patterns, track KPIs, write SQL queries to understand user behavior, and collaborate with product managers to launch A/B tests."
+  }
+]
