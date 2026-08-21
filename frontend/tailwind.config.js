@@ -19,20 +19,21 @@ export default {
           800: '#1422d6',
           900: '#111ca6',
         },
-        ai: {
-          bg: '#06070B',
-          panel: '#0F111E',
-          purple: '#8B5CF6',
-          cyan: '#06B6D4',
-          emerald: '#10B981',
-          coral: '#F43F5E',
-          slate: '#94A3B8',
+        minimal: {
+          bg: '#FAF9F6',
+          card: '#ffffff',
+          border: '#E5E7EB',
+          text: '#111827',
+          grey: '#6B7280',
+          slate: '#3E4A56',
+          green: '#2F5C47',
+          red: '#A34F4F',
         }
       },
       fontFamily: {
-        sans: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'sans-serif'],
-        mono: ['Space Mono', 'monospace'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['"Space Grotesk"', 'sans-serif'],
+        mono: ['monospace'],
       }
     },
   },
