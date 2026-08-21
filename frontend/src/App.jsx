@@ -332,28 +332,34 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Top Hero Header Banner */}
-      <header className="glass-panel sticky top-0 z-40 border-b-2 border-black py-4 px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="min-h-screen flex flex-col bg-ai-bg text-slate-100 selection:bg-ai-purple/30 selection:text-white">
+      {/* Top Hero Header Banner / AI Telemetry Board */}
+      <header className="glass-panel sticky top-0 z-40 border-b border-white/10 py-4 px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-4 bg-ai-panel/60 backdrop-blur-xl rounded-none border-t-0 border-x-0">
         <div className="flex items-center gap-3">
-          <div className="bg-[#1b4332] p-2.5 rounded-sm border border-black shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]">
+          <div className="bg-gradient-to-br from-ai-purple to-ai-cyan p-2 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.25)] border border-white/15">
             <GraduationCapIcon className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-extrabold tracking-tight shimmer-text">
-              SkillBridge
-            </h1>
-            <p className="text-xs text-gray-600 font-bold tracking-wide">
-              AI CAREER NAVIGATOR FOR TIER-2/3 COLLEGE STUDENTS
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl md:text-2xl font-extrabold tracking-tight shimmer-text font-display">
+                SkillBridge
+              </h1>
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold font-mono tracking-wider bg-ai-cyan/10 text-ai-cyan border border-ai-cyan/20">
+                <span className="h-1.5 w-1.5 rounded-full bg-ai-cyan pulse-cyan"></span>
+                CORE // ONLINE
+              </span>
+            </div>
+            <p className="text-[9px] text-ai-slate/80 font-bold tracking-widest uppercase font-mono mt-0.5">
+              AI CAREER INTEL ENGINE FOR TIER-2/3 COLLEGES
             </p>
           </div>
         </div>
         
         {/* Core Global Status / Select Role */}
         <div className="flex flex-col md:flex-row items-end gap-4 w-full md:w-auto">
-          <div className="flex flex-col w-full md:w-56">
-            <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">
-              Select Target Job Role
+          <div className="flex flex-col w-full md:w-60">
+            <label className="text-[9px] text-ai-slate font-bold uppercase tracking-widest mb-1.5 font-mono">
+              Target Career Vector
             </label>
             <select
               value={selectedRole}
@@ -369,7 +375,7 @@ export default function App() {
                 setScorecard(null);
               }}
               disabled={isLoadingRoles}
-              className="bg-white border-2 border-black rounded-sm py-1.5 px-3 text-sm text-black font-semibold focus:outline-none focus:border-[#1b4332] transition-colors w-full"
+              className="bg-[#121422] border border-white/10 hover:border-ai-cyan/40 rounded-md py-1.5 px-3 text-xs text-white font-semibold focus:outline-none focus:border-ai-cyan transition-all w-full cursor-pointer shadow-inner"
             >
               {rolesList.map((role) => (
                 <option key={role} value={role}>{role}</option>
@@ -378,9 +384,9 @@ export default function App() {
           </div>
 
           {selectedRole === 'Other (custom)' && (
-            <div className="flex flex-col w-full md:w-56">
-              <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">
-                Type Custom Role Title
+            <div className="flex flex-col w-full md:w-60">
+              <label className="text-[9px] text-ai-slate font-bold uppercase tracking-widest mb-1.5 font-mono">
+                Initialize Custom Target
               </label>
               <input
                 type="text"
@@ -397,7 +403,7 @@ export default function App() {
                   setInterviewStarted(false);
                   setScorecard(null);
                 }}
-                className="bg-white border-2 border-black rounded-sm py-1.5 px-3 text-sm text-black font-semibold focus:outline-none focus:border-[#1b4332] transition-colors w-full"
+                className="bg-[#121422] border border-white/10 hover:border-ai-cyan/40 rounded-md py-1.5 px-3 text-xs text-white placeholder-slate-500 font-semibold focus:outline-none focus:border-ai-cyan transition-all w-full shadow-inner"
               />
             </div>
           )}
@@ -409,25 +415,25 @@ export default function App() {
         
         {/* Error Modal/Banner */}
         {errorMessage && (
-          <div className="bg-red-50 border border-red-200 rounded-sm p-4 flex items-start gap-3 text-red-800 text-sm">
-            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="bg-ai-coral/10 border border-ai-coral/30 rounded-lg p-4 flex items-start gap-3 text-slate-200 text-sm shadow-[0_0_15px_rgba(244,63,94,0.1)]">
+            <AlertTriangle className="h-5 w-5 text-ai-coral flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <span className="font-bold text-red-950">System Notification:</span> {errorMessage}
+              <span className="font-bold text-white font-mono uppercase tracking-wide">System Warning:</span> {errorMessage}
             </div>
-            <button onClick={() => setErrorMessage('')} className="hover:text-red-950">
+            <button onClick={() => setErrorMessage('')} className="text-ai-slate hover:text-white transition-colors">
               <X className="h-5 w-5" />
             </button>
           </div>
         )}
 
         {/* Tab Navigation Bars */}
-        <div className="flex overflow-x-auto no-scrollbar border-b border-black gap-1.5 whitespace-nowrap">
+        <div className="flex overflow-x-auto no-scrollbar border-b border-white/10 gap-2 whitespace-nowrap">
           <button
             onClick={() => setActiveTab('upload')}
-            className={`flex-shrink-0 flex items-center gap-2 py-3 px-6 text-sm font-semibold rounded-t-sm transition-all border-b-2 ${
+            className={`flex-shrink-0 flex items-center gap-2 py-3 px-6 text-sm font-semibold rounded-t-md transition-all border-b-2 ${
               activeTab === 'upload'
-                ? 'border-black text-[#1b4332] bg-[#1b4332]/5 font-bold'
-                : 'border-transparent text-gray-600 hover:text-[#1b4332]'
+                ? 'border-ai-cyan text-ai-cyan bg-ai-cyan/5 font-bold glow-text-cyan'
+                : 'border-transparent text-ai-slate hover:text-white hover:bg-white/5'
             }`}
           >
             <Upload className="h-4 w-4" />
@@ -442,12 +448,12 @@ export default function App() {
               }
               setActiveTab('learning');
             }}
-            className={`flex-shrink-0 flex items-center gap-2 py-3 px-6 text-sm font-semibold rounded-t-sm transition-all border-b-2 ${
+            className={`flex-shrink-0 flex items-center gap-2 py-3 px-6 text-sm font-semibold rounded-t-md transition-all border-b-2 ${
               !gapResults ? 'opacity-50 cursor-not-allowed' : ''
             } ${
               activeTab === 'learning'
-                ? 'border-black text-[#1b4332] bg-[#1b4332]/5 font-bold'
-                : 'border-transparent text-gray-600 hover:text-[#1b4332]'
+                ? 'border-ai-cyan text-ai-cyan bg-ai-cyan/5 font-bold glow-text-cyan'
+                : 'border-transparent text-ai-slate hover:text-white hover:bg-white/5'
             }`}
           >
             <Map className="h-4 w-4" />
@@ -456,10 +462,10 @@ export default function App() {
           
           <button
             onClick={() => setActiveTab('interview')}
-            className={`flex-shrink-0 flex items-center gap-2 py-3 px-6 text-sm font-semibold rounded-t-sm transition-all border-b-2 ${
+            className={`flex-shrink-0 flex items-center gap-2 py-3 px-6 text-sm font-semibold rounded-t-md transition-all border-b-2 ${
               activeTab === 'interview'
-                ? 'border-black text-[#1b4332] bg-[#1b4332]/5 font-bold'
-                : 'border-transparent text-gray-600 hover:text-[#1b4332]'
+                ? 'border-ai-cyan text-ai-cyan bg-ai-cyan/5 font-bold glow-text-cyan'
+                : 'border-transparent text-ai-slate hover:text-white hover:bg-white/5'
             }`}
           >
             <MessageSquare className="h-4 w-4" />
@@ -472,18 +478,18 @@ export default function App() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             
             {/* Input Ingestion Form */}
-            <div className="glass-panel p-6 rounded-sm flex flex-col gap-5">
+            <div className="glass-panel p-6 rounded-lg flex flex-col gap-5 tech-grid">
               <div className="flex items-center gap-2.5">
-                <FileText className="h-5 w-5 text-[#1b4332]" />
-                <h2 className="text-lg font-bold text-gray-900">Resume / Skills Ingestion</h2>
+                <FileText className="h-5 w-5 text-ai-cyan glow-text-cyan" />
+                <h2 className="text-lg font-bold text-white font-display">Resume / Skills Ingestion</h2>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs text-ai-slate leading-relaxed">
                 Upload your resume in PDF/TXT format or paste the plaintext contents below. Our AI will pull and parse your skills dynamically.
               </p>
               
               <form onSubmit={handleIngestion} className="space-y-4">
                 {/* File Upload Box */}
-                <div className="border-2 border-dashed border-black/30 hover:border-[#1b4332] rounded-sm p-6 transition-all bg-[#f7f6f3]/50 hover:bg-[#f7f6f3] group">
+                <div className="border border-dashed border-white/20 hover:border-ai-cyan/50 rounded-lg p-6 transition-all bg-ai-bg/40 hover:bg-ai-bg/70 group">
                   <input
                     type="file"
                     id="file-upload"
@@ -492,21 +498,21 @@ export default function App() {
                     className="hidden"
                   />
                   <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-2">
-                    <div className="bg-[#1b4332]/10 p-3 rounded-sm text-[#1b4332] border border-[#1b4332]/20 group-hover:scale-110 transition-transform">
+                    <div className="bg-ai-purple/10 p-3 rounded-lg text-ai-purple border border-ai-purple/20 group-hover:scale-105 transition-all shadow-[0_0_10px_rgba(139,92,246,0.15)]">
                       <Upload className="h-6 w-6" />
                     </div>
                     {uploadFile ? (
-                      <span className="text-sm text-[#1b4332] font-semibold">{uploadFile.name}</span>
+                      <span className="text-sm text-ai-cyan font-mono font-semibold">{uploadFile.name}</span>
                     ) : (
                       <>
-                        <span className="text-sm font-semibold text-gray-800">Drag & drop or browse</span>
-                        <span className="text-xs text-gray-500">Supports PDF, TXT</span>
+                        <span className="text-sm font-semibold text-slate-200">Drag & drop or browse</span>
+                        <span className="text-[10px] text-ai-slate font-mono">Supports PDF, TXT</span>
                       </>
                     )}
                   </label>
                 </div>
 
-                <div className="text-center text-xs text-gray-500 font-bold">— OR PASTE RESUME —</div>
+                <div className="text-center text-[10px] text-ai-slate/50 font-bold font-mono tracking-widest">— OR PASTE RESUME CONTENTS —</div>
 
                 {/* Paste Area */}
                 <textarea
@@ -515,13 +521,13 @@ export default function App() {
                   placeholder="Paste details of your projects, skills, education, and work experience..."
                   rows={6}
                   disabled={!!uploadFile}
-                  className="w-full bg-white border border-black rounded-sm p-4 text-sm text-black placeholder-gray-500 focus:outline-none focus:border-[#1b4332] transition-colors disabled:opacity-50"
+                  className="w-full bg-[#121422] border border-white/10 hover:border-ai-cyan/40 rounded-lg p-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-ai-cyan transition-all disabled:opacity-50 shadow-inner resize-none"
                 />
 
                 <button
                   type="submit"
                   disabled={isExtracting}
-                  className="w-full bg-[#1b4332] hover:bg-[#2d6a4f] text-white font-bold py-3 px-4 rounded-sm border border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-ai-purple to-ai-cyan hover:from-ai-purple/90 hover:to-ai-cyan/90 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.25)] hover:shadow-[0_0_20px_rgba(139,92,246,0.35)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed border border-white/15"
                 >
                   {isExtracting ? (
                     <>
@@ -542,18 +548,18 @@ export default function App() {
             <div className="flex flex-col gap-6">
               
               {/* Confirmed Skills Panel */}
-              <div className="glass-panel p-6 rounded-sm flex flex-col gap-4">
+              <div className="glass-panel p-6 rounded-lg flex flex-col gap-4 tech-grid">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-md font-bold text-gray-800">Skills and Experience Profile</h3>
+                  <h3 className="text-md font-bold text-white font-display">Skills and Experience Profile</h3>
                   {experienceLevel && (
-                    <span className="bg-[#1b4332] text-white text-[10px] px-2.5 py-1 rounded-sm border border-black font-bold uppercase">
+                    <span className="neon-badge-purple text-[9px] px-2.5 py-1 rounded-md font-bold font-mono uppercase tracking-wider">
                       {experienceLevel}
                     </span>
                   )}
                 </div>
 
                 {extractedSkills.length === 0 ? (
-                  <div className="border border-black/10 bg-[#f7f6f3]/60 rounded-sm p-8 text-center text-gray-600 text-sm">
+                  <div className="border border-white/10 bg-ai-bg/20 rounded-lg p-8 text-center text-ai-slate text-xs font-mono">
                     No profile loaded yet. Upload your resume or paste text to generate your profile.
                   </div>
                 ) : (
@@ -566,11 +572,11 @@ export default function App() {
                         onChange={(e) => setSkillInput(e.target.value)}
                         placeholder="Add a missing skill manually..."
                         onKeyDown={(e) => e.key === 'Enter' && addSkill()}
-                        className="flex-1 bg-white border border-black rounded-sm py-1.5 px-3 text-xs text-black placeholder-gray-500 focus:outline-none focus:border-[#1b4332]"
+                        className="flex-1 bg-[#121422] border border-white/10 hover:border-ai-cyan/40 rounded-lg py-1.5 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-ai-cyan shadow-inner"
                       />
                       <button
                         onClick={addSkill}
-                        className="bg-white hover:bg-black/5 border border-black rounded-sm px-3 py-1.5 text-black"
+                        className="bg-ai-panel border border-white/15 text-white hover:bg-white/5 rounded-lg px-3 py-1.5 transition-colors"
                       >
                         <Plus className="h-4 w-4" />
                       </button>
@@ -581,12 +587,12 @@ export default function App() {
                       {extractedSkills.map((skill, idx) => (
                         <div
                           key={`${skill}-${idx}`}
-                          className="bg-[#f0ede9] hover:bg-[#eae6e1] border border-black/20 text-black text-xs py-1 px-2.5 rounded-sm flex items-center gap-1.5 transition-colors"
+                          className="neon-badge-cyan text-[11px] py-1 px-2.5 rounded-lg flex items-center gap-1.5 transition-all font-mono"
                         >
                           {skill}
                           <button
                             onClick={() => removeSkill(idx)}
-                            className="hover:text-red-600 text-gray-500"
+                            className="text-ai-slate hover:text-ai-coral transition-colors"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -596,9 +602,9 @@ export default function App() {
 
                     {/* Extracted Projects */}
                     {extractedProjects.length > 0 && (
-                      <div className="pt-2 border-t border-black/10">
-                        <div className="text-xs text-gray-500 font-bold mb-2">Identified Projects:</div>
-                        <ul className="list-disc pl-4 text-xs text-gray-700 space-y-1">
+                      <div className="pt-3 border-t border-white/10">
+                        <div className="text-[10px] text-ai-cyan font-bold font-mono uppercase tracking-wider mb-2">Identified Projects:</div>
+                        <ul className="list-disc pl-4 text-xs text-slate-300 space-y-1.5 font-mono">
                           {extractedProjects.map((proj, idx) => (
                             <li key={idx}>{proj}</li>
                           ))}
@@ -611,7 +617,7 @@ export default function App() {
                       <button
                         onClick={runGapAnalysis}
                         disabled={isAnalyzing}
-                        className="w-full bg-[#1b4332] hover:bg-[#2d6a4f] text-white font-bold py-2.5 px-4 rounded-sm border border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2"
+                        className="w-full bg-gradient-to-r from-ai-purple to-ai-cyan hover:from-ai-purple/90 hover:to-ai-cyan/90 text-white font-bold py-2.5 px-4 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.25)] border border-white/15 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                       >
                         {isAnalyzing ? (
                           <>
@@ -632,32 +638,32 @@ export default function App() {
 
               {/* RAG Analysis Results Output */}
               {gapResults && (
-                <div className="glass-panel p-6 rounded-sm flex flex-col gap-5 border-2 border-black">
-                  <div className="flex justify-between items-center border-b border-black pb-3">
+                <div className="glass-panel p-6 rounded-lg flex flex-col gap-5 border border-white/15 shadow-[0_0_25px_rgba(6,182,212,0.08)] tech-grid">
+                  <div className="flex justify-between items-center border-b border-white/10 pb-3">
                     <div className="flex items-center gap-2">
-                      <Award className="h-5 w-5 text-[#1b4332]" />
-                      <h3 className="text-md font-bold text-gray-900">
+                      <Award className="h-5 w-5 text-ai-cyan glow-text-cyan" />
+                      <h3 className="text-md font-bold text-white font-display">
                         Analysis vs {selectedRole === 'Other (custom)' ? customRoleInput || 'Custom Role' : selectedRole}
                       </h3>
                       {selectedRole === 'Other (custom)' && (
-                        <span className="ml-2 text-[9px] bg-amber-100 text-amber-800 border border-amber-300 font-bold uppercase px-1.5 py-0.5 rounded-sm">
-                          ⚠️ AI-Inferred Estimate
+                        <span className="ml-2 text-[9px] bg-ai-purple/10 text-ai-purple border border-ai-purple/20 font-bold font-mono uppercase px-1.5 py-0.5 rounded">
+                          ⚠️ Inferred Model
                         </span>
                       )}
                     </div>
                     {/* Score badge */}
                     <div className="flex flex-col items-end">
-                      <span className="text-2xl font-black text-[#1b4332] leading-none">
+                      <span className="text-2xl font-black text-ai-cyan leading-none font-display glow-text-cyan">
                         {gapResults.match_percentage}%
                       </span>
-                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wide mt-1">Match Index</span>
+                      <span className="text-[9px] text-ai-slate font-bold uppercase tracking-wider mt-1 font-mono">Match Index</span>
                     </div>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="w-full bg-[#f0ede9] border border-black rounded-sm h-3 overflow-hidden">
+                  <div className="w-full bg-[#121422] border border-white/10 rounded-full h-3 overflow-hidden">
                     <div
-                      className="bg-[#1b4332] h-full rounded-none transition-all duration-1000 ease-out"
+                      className="bg-gradient-to-r from-ai-purple to-ai-cyan h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(6,182,212,0.5)]"
                       style={{ width: `${gapResults.match_percentage}%` }}
                     />
                   </div>
@@ -667,102 +673,102 @@ export default function App() {
                     
                     {/* Matched */}
                     <div>
-                      <div className="text-xs text-[#1b4332] font-bold flex items-center gap-1.5 mb-1.5">
+                      <div className="text-xs text-ai-emerald font-bold flex items-center gap-1.5 mb-1.5 font-mono uppercase tracking-wider">
                         <CheckCircle className="h-3.5 w-3.5" /> Matched Skills ({gapResults.matched.length})
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {gapResults.matched.map((sk) => (
-                          <span key={sk} className="bg-[#d8f3dc] border border-[#1b4332]/30 text-[#1b4332] text-[10px] py-0.5 px-2 rounded-sm font-medium">
+                          <span key={sk} className="neon-badge-emerald text-[10px] py-0.5 px-2 rounded-md font-mono font-medium">
                             {sk}
                           </span>
                         ))}
                         {gapResults.matched.length === 0 && (
-                          <span className="text-xs text-gray-500">None identified</span>
+                          <span className="text-xs text-ai-slate/50 font-mono">None identified</span>
                         )}
                       </div>
                     </div>
 
                     {/* Partial */}
                     <div>
-                      <div className="text-xs text-[#b87d2b] font-bold flex items-center gap-1.5 mb-1.5">
+                      <div className="text-xs text-amber-400 font-bold flex items-center gap-1.5 mb-1.5 font-mono uppercase tracking-wider">
                         <HelpCircle className="h-3.5 w-3.5" /> Partial Skills ({gapResults.partial.length})
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {gapResults.partial.map((sk) => (
-                          <span key={sk} className="bg-[#fef9c3] border border-[#b87d2b]/30 text-[#854d0e] text-[10px] py-0.5 px-2 rounded-sm font-medium">
+                          <span key={sk} className="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] py-0.5 px-2 rounded-md font-mono font-medium">
                             {sk}
                           </span>
                         ))}
                         {gapResults.partial.length === 0 && (
-                          <span className="text-xs text-gray-500">None identified</span>
+                          <span className="text-xs text-ai-slate/50 font-mono">None identified</span>
                         )}
                       </div>
                     </div>
 
                     {/* Missing */}
                     <div>
-                      <div className="text-xs text-[#991b1b] font-bold flex items-center gap-1.5 mb-1.5">
+                      <div className="text-xs text-ai-coral font-bold flex items-center gap-1.5 mb-1.5 font-mono uppercase tracking-wider">
                         <AlertTriangle className="h-3.5 w-3.5" /> Missing Skills ({gapResults.missing.length})
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {gapResults.missing.map((sk) => (
-                          <span key={sk} className="bg-[#ffeeeb] border border-[#991b1b]/30 text-[#991b1b] text-[10px] py-0.5 px-2 rounded-sm font-medium">
+                          <span key={sk} className="neon-badge-coral text-[10px] py-0.5 px-2 rounded-md font-mono font-medium">
                             {sk}
                           </span>
                         ))}
                         {gapResults.missing.length === 0 && (
-                          <span className="text-xs text-gray-500">None identified</span>
+                          <span className="text-xs text-ai-slate/50 font-mono">None identified</span>
                         )}
                       </div>
                     </div>
                   </div>
 
                   {/* Summary */}
-                  <div className="bg-[#f0ede9] p-4 rounded-sm border border-black">
-                    <div className="text-xs text-gray-600 font-bold mb-1.5">Evaluation Summary:</div>
-                    <p className="text-xs text-gray-800 leading-relaxed font-normal">{gapResults.summary}</p>
+                  <div className="bg-ai-bg/60 p-4 rounded-lg border border-white/10 shadow-inner">
+                    <div className="text-[10px] text-ai-cyan font-bold font-mono uppercase tracking-wider mb-1.5">Evaluation Summary:</div>
+                    <p className="text-xs text-slate-300 leading-relaxed font-normal">{gapResults.summary}</p>
                   </div>
 
                   {/* Collapsible Reasoning Section */}
                   {gapResults.reasoning && Object.keys(gapResults.reasoning).length > 0 && (
-                    <div className="bg-white border border-black rounded-sm overflow-hidden">
+                    <div className="bg-ai-panel/30 border border-white/10 rounded-lg overflow-hidden">
                       <button
                         onClick={() => setShowReasoning(!showReasoning)}
-                        className="w-full text-left px-4 py-3 flex items-center justify-between text-xs font-bold text-gray-800 hover:bg-black/5 transition-colors"
+                        className="w-full text-left px-4 py-3 flex items-center justify-between text-xs font-bold text-slate-200 hover:bg-white/5 transition-colors font-mono uppercase tracking-wider"
                       >
                         <span className="flex items-center gap-1.5">
-                          <HelpCircle className="h-4 w-4 text-[#1b4332]" />
-                          Why this result? (Skill-by-Skill Breakdown)
+                          <HelpCircle className="h-4 w-4 text-ai-purple" />
+                          Diagnostic breakdown
                         </span>
                         <span>{showReasoning ? '▲' : '▼'}</span>
                       </button>
                       
                       {showReasoning && (
-                        <div className="px-4 pb-4 pt-1 space-y-2.5 border-t border-black/10 bg-[#f7f6f3]/30 max-h-60 overflow-y-auto">
+                        <div className="px-4 pb-4 pt-1 space-y-2.5 border-t border-white/10 bg-ai-bg/40 max-h-60 overflow-y-auto">
                           {Object.entries(gapResults.reasoning).map(([skill, reason]) => {
                             const isMatched = gapResults.matched.some(s => s.toLowerCase() === skill.toLowerCase());
                             const isPartial = gapResults.partial.some(s => s.toLowerCase() === skill.toLowerCase());
                             
-                            let badgeColor = "bg-[#ffeeeb] border-[#991b1b]/30 text-[#991b1b]";
+                            let badgeColor = "neon-badge-coral";
                             let category = "Missing";
                             
                             if (isMatched) {
-                              badgeColor = "bg-[#d8f3dc] border-[#1b4332]/30 text-[#1b4332]";
+                              badgeColor = "neon-badge-emerald";
                               category = "Matched";
                             } else if (isPartial) {
-                              badgeColor = "bg-[#fef9c3] border-[#b87d2b]/30 text-[#854d0e]";
+                              badgeColor = "bg-amber-500/10 border border-amber-500/30 text-amber-400";
                               category = "Partial";
                             }
                             
                             return (
-                              <div key={skill} className="text-xs border-b border-black/5 pb-2 last:border-b-0 last:pb-0 pt-1">
+                              <div key={skill} className="text-xs border-b border-white/5 pb-2 last:border-b-0 last:pb-0 pt-1 font-mono">
                                 <div className="flex items-center justify-between gap-2 mb-1">
-                                  <span className="font-bold text-gray-800">{skill}</span>
-                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${badgeColor}`}>
+                                  <span className="font-bold text-white">{skill}</span>
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${badgeColor}`}>
                                     {category}
                                   </span>
                                 </div>
-                                <p className="text-gray-600 leading-relaxed font-normal text-[11px]">{reason}</p>
+                                <p className="text-slate-400 leading-relaxed font-normal text-[11px] font-sans">{reason}</p>
                               </div>
                             );
                           })}
@@ -776,7 +782,7 @@ export default function App() {
                     <button
                       onClick={runLearningPath}
                       disabled={isGeneratingPath || (gapResults.missing.length === 0 && gapResults.partial.length === 0)}
-                      className="w-full bg-[#1b4332] hover:bg-[#2d6a4f] text-white font-bold py-2.5 px-4 rounded-sm border border-black shadow-[2px_2px_0px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#000] transition-all flex items-center justify-center gap-2"
+                      className="w-full bg-gradient-to-r from-ai-purple to-ai-cyan hover:from-ai-purple/90 hover:to-ai-cyan/90 text-white font-bold py-2.5 px-4 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.25)] border border-white/15 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {isGeneratingPath ? (
                         <>
@@ -800,20 +806,20 @@ export default function App() {
 
         {/* TAB 2: LEARNING PATH */}
         {activeTab === 'learning' && (
-          <div className="glass-panel p-6 md:p-8 rounded-sm flex flex-col gap-6 max-w-4xl mx-auto w-full">
-            <div className="flex justify-between items-center border-b border-black pb-4">
+          <div className="glass-panel p-6 md:p-8 rounded-lg flex flex-col gap-6 max-w-4xl mx-auto w-full tech-grid">
+            <div className="flex justify-between items-center border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <Map className="h-6 w-6 text-[#1b4332]" />
+                <Map className="h-6 w-6 text-ai-cyan glow-text-cyan" />
                 <div>
-                  <h2 className="text-lg font-bold text-gray-905">Personalized Learning Roadmap</h2>
-                  <p className="text-xs text-gray-500">Target Role: {selectedRole === 'Other (custom)' ? customRoleInput || 'Custom Role' : selectedRole}</p>
+                  <h2 className="text-lg font-bold text-white font-display">Personalized Learning Roadmap</h2>
+                  <p className="text-xs text-ai-slate font-mono">Target Role: {selectedRole === 'Other (custom)' ? customRoleInput || 'Custom Role' : selectedRole}</p>
                 </div>
               </div>
               
               <button 
                 onClick={runLearningPath}
                 disabled={isGeneratingPath}
-                className="text-xs bg-white border border-black rounded-sm px-3 py-1.5 flex items-center gap-1.5 text-black hover:bg-black/5 font-semibold"
+                className="text-xs bg-[#121422] border border-white/10 hover:border-ai-cyan/40 hover:bg-white/5 rounded-md px-3 py-1.5 flex items-center gap-1.5 text-white font-semibold transition-all cursor-pointer shadow-inner"
               >
                 <RefreshCw className={`h-3 w-3 ${isGeneratingPath ? 'animate-spin' : ''}`} />
                 Regenerate Path
@@ -822,30 +828,30 @@ export default function App() {
 
             {learningPath ? (
               learningPath.length > 0 ? (
-                <div className="relative pl-6 md:pl-8 border-l border-black/35 space-y-8 my-4">
+                <div className="relative pl-6 md:pl-8 border-l border-white/10 space-y-8 my-4">
                   {learningPath.map((step, idx) => (
                     <div key={idx} className="relative">
                       {/* Node Dot */}
-                      <span className="absolute -left-[35px] md:-left-[43px] top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white border-2 border-black text-xs font-black text-[#1b4332] shadow-md shadow-[#1b4332]/10">
+                      <span className="absolute -left-[35px] md:-left-[43px] top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-ai-panel border border-white/20 text-xs font-black text-ai-cyan font-mono shadow-[0_0_10px_rgba(6,182,212,0.15)] pulse-cyan">
                         {idx + 1}
                       </span>
                       
                       {/* Roadmap step card */}
-                      <div className="bg-white border border-black p-5 rounded-sm hover:border-[#1b4332] hover:shadow-[3px_3px_0px_0px_#1b4332] transition-all">
+                      <div className="bg-ai-panel/50 border border-white/10 p-5 rounded-lg hover:border-ai-purple/50 hover:shadow-[0_0_15px_rgba(139,92,246,0.1)] transition-all">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
-                          <h4 className="text-md font-extrabold text-[#1b4332]">{step.skill}</h4>
-                          <span className="bg-[#1b4332]/10 text-[#1b4332] text-[10px] py-1 px-2.5 rounded-sm font-bold flex-shrink-0 self-start md:self-auto border border-[#1b4332]/20">
+                          <h4 className="text-md font-extrabold text-white font-display">{step.skill}</h4>
+                          <span className="bg-ai-purple/10 text-ai-purple text-[10px] py-1 px-2.5 rounded-md font-bold font-mono border border-ai-purple/20 flex-shrink-0 self-start md:self-auto">
                             ⏳ Est. Time: {step.learning_time}
                           </span>
                         </div>
                         
-                        <p className="text-xs text-gray-700 mb-4 leading-relaxed font-normal">
+                        <p className="text-xs text-slate-350 mb-4 leading-relaxed font-normal">
                           {step.why_it_matters}
                         </p>
                         
                         {/* Resources */}
                         <div>
-                          <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2">Recommended Study Resources:</div>
+                          <div className="text-[10px] text-ai-cyan font-bold font-mono uppercase tracking-wider mb-2">Recommended Study Resources:</div>
                           <div className="flex flex-wrap gap-2">
                             {step.resources.map((res, rIdx) => {
                               const label = typeof res === 'object' && res !== null ? res.label : res;
@@ -856,9 +862,9 @@ export default function App() {
                                   href={url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="bg-white border border-black hover:bg-[#1b4332] hover:text-white hover:border-black transition-colors text-xs py-1.5 px-3 rounded-sm flex items-center gap-2 cursor-pointer group"
+                                  className="bg-[#121422] border border-white/10 hover:border-ai-cyan/50 hover:bg-ai-panel transition-all text-xs py-1.5 px-3 rounded-md flex items-center gap-2 text-white font-mono cursor-pointer group shadow-inner"
                                 >
-                                  <BookOpen className="h-3.5 w-3.5 text-[#1b4332] group-hover:text-white" />
+                                  <BookOpen className="h-3.5 w-3.5 text-ai-purple group-hover:text-ai-cyan group-hover:scale-105 transition-all" />
                                   <span>{label}</span>
                                 </a>
                               );
@@ -870,16 +876,16 @@ export default function App() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-[#d8f3dc] border border-[#1b4332] p-8 rounded-sm text-center max-w-xl mx-auto my-6">
-                  <span className="inline-block bg-[#1b4332]/10 p-4 rounded-sm text-[#1b4332] border border-[#1b4332]/25 mb-4 font-bold text-2xl">🎉</span>
-                  <h4 className="text-lg font-bold text-black mb-2">Perfect Fit!</h4>
-                  <p className="text-sm text-gray-850">
+                <div className="bg-ai-emerald/10 border border-ai-emerald/20 p-8 rounded-lg text-center max-w-xl mx-auto my-6 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                  <span className="inline-block bg-ai-emerald/15 p-4 rounded-lg text-ai-emerald border border-ai-emerald/30 mb-4 font-bold text-2xl">🎉</span>
+                  <h4 className="text-lg font-bold text-white mb-2 font-display">Perfect Fit!</h4>
+                  <p className="text-sm text-slate-300">
                     Your skills are a perfect match for the selected role. No skill gaps detected, so you do not need a custom learning path roadmap. You are fully ready for this role!
                   </p>
                 </div>
               )
             ) : (
-              <div className="text-center py-12 text-gray-500 text-sm border border-dashed border-black/30 rounded-sm">
+              <div className="text-center py-12 text-ai-slate text-xs font-mono border border-dashed border-white/10 rounded-lg bg-ai-panel/20">
                 No learning path generated. Click the generate button on your Gap Analysis report under "Upload & Analyze" tab to build your path.
               </div>
             )}
@@ -894,16 +900,16 @@ export default function App() {
             <div className="lg:col-span-1 flex flex-col gap-6">
               
               {/* Interview Controller Card */}
-              <div className="glass-panel p-6 rounded-sm flex flex-col gap-4">
-                <h3 className="text-md font-bold text-gray-900">Interview Controller</h3>
-                <p className="text-xs text-gray-600">
-                  Conduct a standard 5-question interview tailored to the <span className="font-semibold text-[#1b4332]">{selectedRole === 'Other (custom)' ? customRoleInput || 'Custom Role' : selectedRole}</span> role. Answer questions fully. At the end, you'll receive a mock scorecard detailing strengths and advice.
+              <div className="glass-panel p-6 rounded-lg flex flex-col gap-4 tech-grid">
+                <h3 className="text-md font-bold text-white font-display">Interview Controller</h3>
+                <p className="text-xs text-ai-slate leading-relaxed">
+                  Conduct a standard 5-question interview tailored to the <span className="font-semibold text-ai-cyan glow-text-cyan">{selectedRole === 'Other (custom)' ? customRoleInput || 'Custom Role' : selectedRole}</span> role. Answer questions fully. At the end, you'll receive a mock scorecard detailing strengths and advice.
                 </p>
                 
                 <button
                   onClick={startInterview}
                   disabled={isInterviewing}
-                  className="w-full bg-[#1b4332] hover:bg-[#2d6a4f] text-white font-bold py-2.5 px-4 rounded-sm border border-black shadow-[2px_2px_0px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#000] transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-ai-purple to-ai-cyan hover:from-ai-purple/90 hover:to-ai-cyan/90 text-white font-bold py-2.5 px-4 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.25)] border border-white/15 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                 >
                   <RefreshCw className="h-4 w-4" />
                   {interviewStarted ? "Restart Interview" : "Start Mock Interview"}
@@ -912,11 +918,11 @@ export default function App() {
 
               {/* Turn-by-Turn Immediate Feedback */}
               {lastFeedback && !isInterviewFinished && (
-                <div className="bg-[#f0ede9] border border-black p-5 rounded-sm flex flex-col gap-2.5">
-                  <div className="flex items-center gap-2 text-[#1b4332] text-xs font-bold uppercase tracking-wider">
+                <div className="bg-[#121422] border border-white/10 p-5 rounded-lg flex flex-col gap-2.5 shadow-inner">
+                  <div className="flex items-center gap-2 text-ai-purple text-xs font-bold font-mono uppercase tracking-wider">
                     <Zap className="h-4 w-4" /> Last Response Feedback
                   </div>
-                  <p className="text-xs text-gray-800 leading-relaxed font-normal">
+                  <p className="text-xs text-slate-350 leading-relaxed font-normal italic">
                     "{lastFeedback}"
                   </p>
                 </div>
@@ -924,31 +930,31 @@ export default function App() {
             </div>
 
             {/* Chat Box Interface */}
-            <div className="lg:col-span-2 glass-panel rounded-sm flex flex-col h-[560px] overflow-hidden">
+            <div className="lg:col-span-2 glass-panel rounded-lg flex flex-col h-[560px] overflow-hidden border border-white/10 shadow-[0_0_25px_rgba(139,92,246,0.05)]">
               
               {/* Chat Header */}
-              <div className="bg-[#f0ede9] px-6 py-4 border-b border-black flex items-center justify-between">
+              <div className="bg-ai-panel/85 px-6 py-4 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-[#1b4332]" />
-                  <span className="text-sm font-bold text-gray-900">Live Mock Session</span>
+                  <MessageSquare className="h-5 w-5 text-ai-cyan glow-text-cyan" />
+                  <span className="text-sm font-bold text-white font-display">Live Mock Session</span>
                 </div>
                 {interviewStarted && (
-                  <span className="bg-white border border-black text-[#1b4332] text-[10px] px-2.5 py-1 rounded-sm font-bold uppercase">
+                  <span className="bg-ai-cyan/15 border border-ai-cyan/30 text-ai-cyan text-[9px] px-2.5 py-1 rounded-md font-bold font-mono tracking-wider">
                     Stateless Session
                   </span>
                 )}
               </div>
 
               {/* Chat Messages Log */}
-              <div className="flex-1 p-6 overflow-y-auto space-y-4">
+              <div className="flex-1 p-6 overflow-y-auto space-y-4 custom-scrollbar">
                 {!interviewStarted ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center text-gray-600 text-sm gap-3">
-                    <div className="bg-black/5 p-4 rounded-sm text-black border border-black/10">
+                  <div className="h-full flex flex-col items-center justify-center text-center text-ai-slate text-xs gap-3">
+                    <div className="bg-ai-purple/10 p-4 rounded-lg text-ai-purple border border-ai-purple/20">
                       <MessageSquare className="h-8 w-8" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-800">Interview Session Ready</p>
-                      <p className="text-xs text-gray-500 max-w-xs mt-1">
+                      <p className="font-semibold text-slate-200 font-display">Interview Session Ready</p>
+                      <p className="text-[10px] text-ai-slate max-w-xs mt-1 font-mono">
                         Click "Start Mock Interview" in the panel to begin.
                       </p>
                     </div>
@@ -965,17 +971,19 @@ export default function App() {
                           }`}
                         >
                           {/* Avatar */}
-                          <div className={`h-8 w-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${
-                            isAssistant ? 'bg-[#1b4332] text-white border border-black' : 'bg-[#eae6e1] text-black border border-black/30'
+                          <div className={`h-8 w-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold font-mono ${
+                            isAssistant 
+                              ? 'bg-gradient-to-br from-ai-purple to-ai-cyan text-white border border-white/15 shadow-[0_0_8px_rgba(139,92,246,0.2)]' 
+                              : 'bg-[#121422] text-ai-cyan border border-white/10'
                           }`}>
                             {isAssistant ? "AI" : <User className="h-4 w-4" />}
                           </div>
                           
                           {/* Text bubble */}
-                          <div className={`p-4 rounded-sm text-xs leading-relaxed ${
+                          <div className={`p-4 rounded-lg text-xs leading-relaxed ${
                             isAssistant 
-                              ? 'bg-white text-black rounded-tl-none border-2 border-black shadow-[2px_2px_0px_0px_#000]' 
-                              : 'bg-[#1b4332] text-white rounded-tr-none border border-black shadow-[2px_2px_0px_0px_#000]'
+                              ? 'bg-ai-panel/90 text-slate-100 rounded-tl-none border border-white/15 shadow-md' 
+                              : 'bg-gradient-to-r from-ai-purple/15 to-ai-cyan/5 text-slate-200 rounded-tr-none border border-ai-cyan/35 shadow-md'
                           }`}>
                             <p className="whitespace-pre-line font-medium">{msg.content}</p>
                           </div>
@@ -985,17 +993,17 @@ export default function App() {
 
                     {/* Premium Styled Scorecard Component */}
                     {isInterviewFinished && scorecard && (
-                      <div className="bg-[#d8f3dc] border border-[#1b4332] rounded-sm p-6 mt-4 space-y-4 shadow-[2px_2px_0px_0px_#1b4332]">
-                        <div className="flex items-center gap-2 border-b border-[#1b4332]/35 pb-3">
-                          <Award className="h-6 w-6 text-[#1b4332]" />
-                          <h4 className="text-sm font-extrabold text-[#1b4332]">Mock Interview Scorecard</h4>
+                      <div className="bg-ai-panel border border-white/10 rounded-lg p-6 mt-4 space-y-4 shadow-[0_0_20px_rgba(6,182,212,0.1)]">
+                        <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                          <Award className="h-6 w-6 text-ai-cyan" />
+                          <h4 className="text-sm font-extrabold text-white font-display">Mock Interview Scorecard</h4>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {/* Strengths */}
-                          <div className="bg-[#d8f3dc]/30 border border-[#1b4332] p-4 rounded-sm">
-                            <div className="text-xs font-bold text-[#1b4332] mb-2 uppercase tracking-wide">Key Strengths:</div>
-                            <ul className="list-disc pl-4 text-[11px] text-gray-800 space-y-1.5 leading-relaxed font-normal">
+                          <div className="bg-ai-emerald/10 border border-ai-emerald/20 p-4 rounded-lg shadow-inner">
+                            <div className="text-xs font-bold text-ai-emerald mb-2 font-mono uppercase tracking-wider">Key Strengths:</div>
+                            <ul className="list-disc pl-4 text-[11px] text-slate-300 space-y-1.5 leading-relaxed font-normal">
                               {scorecard.includes("**Strengths:**") ? (
                                 scorecard.split("**Weaknesses/Gaps:**")[0]
                                   .replace("### Mock Interview Scorecard", "")
@@ -1011,9 +1019,9 @@ export default function App() {
                           </div>
                           
                           {/* Weaknesses */}
-                          <div className="bg-[#ffeeeb]/30 border border-[#991b1b] p-4 rounded-sm">
-                            <div className="text-xs font-bold text-[#991b1b] mb-2 uppercase tracking-wide">Areas to Improve:</div>
-                            <ul className="list-disc pl-4 text-[11px] text-gray-800 space-y-1.5 leading-relaxed font-normal">
+                          <div className="bg-ai-coral/10 border border-ai-coral/20 p-4 rounded-lg shadow-inner">
+                            <div className="text-xs font-bold text-ai-coral mb-2 font-mono uppercase tracking-wider">Areas to Improve:</div>
+                            <ul className="list-disc pl-4 text-[11px] text-slate-300 space-y-1.5 leading-relaxed font-normal">
                               {scorecard.includes("**Weaknesses/Gaps:**") ? (
                                 scorecard.split("**Weaknesses/Gaps:**")[1]
                                   .split("**Actionable Tips:**")[0]
@@ -1030,11 +1038,11 @@ export default function App() {
                         </div>
                         
                         {/* Actionable Advice */}
-                        <div className="bg-[#f0ede9] border border-black p-4 rounded-sm">
-                          <div className="text-xs font-bold text-[#1b4332] mb-2 flex items-center gap-1.5 uppercase tracking-wide">
-                            <Zap className="h-3.5 w-3.5 text-[#1b4332]" /> Actionable Advice:
+                        <div className="bg-[#121422] border border-white/10 p-4 rounded-lg shadow-inner">
+                          <div className="text-xs font-bold text-ai-cyan mb-2 flex items-center gap-1.5 font-mono uppercase tracking-wider">
+                            <Zap className="h-3.5 w-3.5 text-ai-cyan" /> Actionable Advice:
                           </div>
-                          <p className="text-[11px] text-gray-850 leading-relaxed font-medium">
+                          <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
                             {scorecard.includes("**Actionable Tips:**") ? (
                               scorecard.split("**Actionable Tips:**")[1]
                                 .replace("**Actionable Tips:**", "")
@@ -1053,9 +1061,9 @@ export default function App() {
 
               {/* Chat Input form */}
               {interviewStarted && (
-                <div className="bg-[#f0ede9] border-t border-black p-4">
+                <div className="bg-ai-panel/85 border-t border-white/10 p-4">
                   {isInterviewFinished ? (
-                    <div className="bg-[#d8f3dc] border border-[#1b4332] rounded-sm p-3.5 text-center text-[#1b4332] text-xs font-semibold">
+                    <div className="bg-ai-emerald/10 border border-ai-emerald/20 rounded-lg p-3.5 text-center text-ai-emerald text-xs font-semibold font-mono">
                       🎓 Interview successfully completed! You can review your detailed scorecard above.
                     </div>
                   ) : (
@@ -1069,7 +1077,7 @@ export default function App() {
       </main>
 
       {/* Footer Info */}
-      <footer className="py-6 text-center text-xs text-gray-700 border-t border-black mt-12 bg-white">
+      <footer className="py-6 text-center text-[10px] text-ai-slate border-t border-white/10 mt-12 bg-ai-panel/30 font-mono tracking-widest uppercase">
         SkillBridge MVP — Building Decent Work and Economic Growth (SDG 8)
       </footer>
     </div>
@@ -1124,12 +1132,12 @@ function ChatForm({ onSubmit, isSubmittingAnswer }) {
           }
         }}
         disabled={isSubmittingAnswer}
-        className="flex-1 bg-white border border-black rounded-sm py-2 px-4 text-xs text-black placeholder-gray-500 focus:outline-none focus:border-[#1b4332] resize-none disabled:opacity-50"
+        className="flex-1 bg-[#121422] border border-white/10 rounded-md py-2.5 px-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-ai-cyan resize-none disabled:opacity-50 transition-all shadow-inner"
       />
       <button
         type="submit"
         disabled={isSubmittingAnswer || !inputValue.trim()}
-        className="bg-[#1b4332] hover:bg-[#2d6a4f] text-white border border-black rounded-sm px-4 flex items-center justify-center flex-shrink-0 disabled:opacity-50 transition-colors"
+        className="bg-gradient-to-r from-ai-purple to-ai-cyan hover:from-ai-purple/90 hover:to-ai-cyan/90 text-white rounded-md px-4 flex items-center justify-center flex-shrink-0 disabled:opacity-50 transition-all border border-white/10 active:scale-[0.98] shadow-md"
       >
         {isSubmittingAnswer ? (
           <RefreshCw className="h-4 w-4 animate-spin" />
